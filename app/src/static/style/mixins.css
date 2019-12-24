@@ -1,0 +1,11 @@
+@font-face {
+  font-family: pictos;
+  src: url("../font/LilyoftheValley.ttf");
+}
+
+.mainTitle {
+  font-size: 32px;
+  line-height: 40px;
+  color: #383;
+  font-family: pictos;
+}

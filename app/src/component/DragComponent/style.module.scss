@@ -1,0 +1,10 @@
+.wrapper {
+  border: 2px solid #4f98ca;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0 0 8px rgba(#eee, 0.8);
+}
+
+.active {
+  box-shadow: 0 0 8px rgba(#617be3, 0.8);
+}
