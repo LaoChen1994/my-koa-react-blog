@@ -1,6 +1,11 @@
+@import '../../static/style/mixins';
+
 .wrapper {
-  margin: 50px auto;
+  margin: 100px auto;
   width: 1000px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
   @media screen and (min-width: 1300px) {
     width: 1100px;
@@ -9,4 +14,78 @@
   @media screen and (min-width: 1600px) {
     width: 1300px;
   }
+}
+
+.wrapper .drageWrapper {
+  width: 40%;
+  border: #fff;
+  box-shadow: 0 0 10px rgba(#33bbff, 0.7);
+  overflow: auto;
+  position: relative;
+  outline: none;
+}
+
+.title {
+  @extend .mainTitle;
+}
+
+.controller {
+  position: absolute;
+  bottom: 0;
+  right: 20px;
+  text-align: right;
+  padding: 20px 0;
+  display: block;
+  box-sizing: border-box;
+}
+
+.formController {
+  text-align: right;
+}
+
+.noteWrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.noteId {
+  flex: 0 30%;
+}
+
+.noteTitle {
+  flex: 1;
+  overflow: hidden;
+
+  & > div {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.tag {
+  width: 50px;
+  display: flex;
+  justify-content: center;
+}
+
+.content {
+  padding: 10px 0 0;
+}
+
+.workStatus {
+  display: flex;
+  justify-content: space-between;
+  @extend .note_text;
+  align-items: center;
+}
+
+.detailContent {
+  @extend .normal_text;
+  background: #eee;
+  margin: 10px;
+}
+
+.subController {
+  text-align: right;
 }

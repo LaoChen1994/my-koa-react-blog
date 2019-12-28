@@ -161,3 +161,21 @@ const handleLogin = async () => {
 - 元素的 display 设为 block
 
 #### 5. javascript Blob 与字符串之间的转换
+
+使用 iconv-lite 库中的 decode 方法
+
+```javascript
+const iconv = require('iconv-lite');
+// 这里的todoItem是一个blob对象 type: text
+elem.todoItem = iconv.decode(elem.todoItem, 'UTF-8');
+```
+
+#### 6. mysql 插入 datetime 数据类型格式不对的解决办法
+
+```javascript
+// 这里的startTime是前端传过来经过Date.IOString转化的字符串
+// 先通过new Date转换为JS的Date对象
+// 之后通过moment库转换数据格式
+const _startTime = moment(new Date(startTime)).format('YYYY-MM-DD HH:mm:ss');
+const _endTime = moment(new Date(endTime)).format('YYYY-MM-DD HH:mm:ss');
+```

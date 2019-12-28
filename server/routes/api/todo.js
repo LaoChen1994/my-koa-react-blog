@@ -1,7 +1,8 @@
-const router = require('koa-router')()
+const router = require('koa-router')();
+const TodoController = require('../../controller/todo.js');
 
-router.get('/addTodoItem', function (ctx, next) {
-  ctx.body = 'this is a users response!'
-})
+router.post('/addTodoItem', TodoController.addTodoItem);
+router.get('/getTodoList', TodoController.getTodoList);
+router.get('/finishItem', TodoController.finishItem);
 
-module.exports = router
+module.exports = router;
