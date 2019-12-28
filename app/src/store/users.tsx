@@ -15,7 +15,7 @@ const reducer = (state: IUserState, action: UserAction) => {
     case 'login':
       const {
         username = '',
-        userId = '',
+        userId = -1,
         isLogin = false,
         avatarUrl = ''
       } = action.payload;

@@ -1,0 +1,38 @@
+@import '../../static/style/mixins.scss';
+
+.wrapper {
+  outline: none;
+  border: 1px solid #5d5b6a;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.title {
+  @extend .large_text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.content {
+  max-height: 0px;
+  overflow-y: hidden;
+  transition: max-height 1s ease;
+}
+
+.showContent {
+  // padding: 10px 0;
+  max-height: 200px;
+}
+
+.briefNote {
+  @extend .note_text;
+  opacity: 1;
+  height: 14px;
+  transition: all 1s ease;
+}
+
+.briefDispear{
+  opacity: 0;
+  height: 0;
+}

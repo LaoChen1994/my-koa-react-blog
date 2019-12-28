@@ -1,10 +1,13 @@
 .wrapper {
-  border: 2px solid #4f98ca;
+  border: 2px solid #eee;
   border-radius: 5px;
   padding: 20px;
-  box-shadow: 0 0 8px rgba(#eee, 0.8);
+  box-shadow: 0 0 8px rgba(#333, 0.8);
+  box-sizing: border-box;
+  width: 400px;
+  height: 400px;
 }
 
 .active {
-  box-shadow: 0 0 8px rgba(#617be3, 0.8);
+  box-shadow: 0 5px 10px rgba(#f44, 0.8)!important;
 }

@@ -20,7 +20,7 @@ const SqlHandler = function() {
     async update(table, updateObj, conditionObj) {
       let _sql = 'UPDATE ?? SET ? WHERE ? ';
       const data = await query(_sql, [table, updateObj, conditionObj]);
-      return this;
+      return data;
     },
     async select(table, keys, conditionObj) {
       let _sql = 'SELECT ? FROM ?? WHERE ?';

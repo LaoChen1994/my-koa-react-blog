@@ -1,10 +1,10 @@
-import { IUserLink, ILinkMap } from './interface';
+import { IUserLink, ILinkMap, IUserState } from './interface';
 
 export const ApiHost = 'http://127.0.0.1:8000/api';
 
-export const initUserInfo = {
+export const initUserInfo: IUserState = {
   username: '',
-  userId: '',
+  userId: -1,
   isLogin: false,
   avatarUrl: '',
   email: ''

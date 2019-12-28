@@ -1,6 +1,6 @@
 export interface IUserState {
   username: string;
-  userId: string;
+  userId: number;
   email: string;
   isLogin: boolean;
   avatarUrl: string;
