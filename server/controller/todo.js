@@ -1,6 +1,6 @@
 const { SqlHandler } = require('../model/utils/handleSql');
 const { query } = require('../model/utils/query.js');
-const { genResp, to } = require('../utils');
+const { genResp, to, setCtxBody, timeFormat } = require('../utils');
 const moment = require('moment');
 const iconv = require('iconv-lite');
 
@@ -51,6 +51,12 @@ module.exports = TodoController = {
     if (!error) {
       data = data.map(elem => {
         elem.todoItem = iconv.decode(elem.todoItem, 'UTF-8');
+        elem.startTime = moment(new Date(elem.startTime)).format(
+          'YYYY-MM-DD HH:mm:ss'
+        );
+        elem.endTime = moment(new Date(elem.endTime)).format(
+          'YYYY-MM-DD HH:mm:ss'
+        );
         return elem;
       });
 
@@ -62,11 +68,88 @@ module.exports = TodoController = {
   },
   finishItem: async ctx => {
     const { todoId } = ctx.query;
-    const [err, data] = to(handler.update('KOA_TODO', {isComplete: true}, {todoId}));
+    const sql = `select * from KOA_TODO where todoId=${todoId}`;
+    let isExpire = false;
+    const [err, data] = await to(query(sql));
 
-    console.log('error = ', err);
-    console.log('data=', data);
+    if (!err & data.length) {
+      const { endTime } = data[0];
+      const end = new Date(endTime);
 
-    ctx.body = genResp(true, '已更新Todo状态');
+      isExpire = end > new Date();
+    } else {
+      setCtxBody('事件不存在', {}, ctx, '', '事件不存在');
+      return;
+    }
+
+    if (todoId && todoId !== -1) {
+      const [err, data] = await to(
+        handler.update('KOA_TODO', { isComplete: true, isExpire }, { todoId })
+      );
+      setCtxBody(err, data, ctx, '对应事件已完成', '项目完成失败');
+    } else {
+      setCtxBody('用户ID读取失败', {}, ctx, '', '用户ID读取失败');
+    }
+  },
+  recallTodo: async ctx => {
+    const { todoId } = ctx.query;
+    if (todoId && todoId !== -1) {
+      const [err, data] = await to(
+        handler.update('KOA_TODO', { isComplete: false }, { todoId })
+      );
+      setCtxBody(err, data, ctx, '已撤回执行状态', '撤回失败');
+    } else {
+      setCtxBody('用户ID读取失败', {}, ctx, '', '用户ID读取失败');
+    }
+  },
+  deleteTodo: async ctx => {
+    const { todoId } = ctx.query;
+
+    const sql = `DELETE FROM KOA_TODO WHERE todoId=${todoId}`;
+
+    if (todoId && todoId !== -1) {
+      const [err, data] = await to(query(sql));
+      setCtxBody(err, data, ctx, '删除事件成功', '删除事件失败');
+    } else {
+      setCtxBody('用户ID读取失败', {}, ctx, '', '用户ID读取失败');
+    }
+  },
+  clearAll: async ctx => {
+    const { todoIds = [] } = ctx.request.body;
+
+    if (todoIds && todoIds.length) {
+      const sql = `DELETE FROM KOA_TODO WHERE todoId IN (${todoIds.join(',')})`;
+      const [err, data] = await to(query(sql));
+
+      if (!err) {
+        ctx.body = genResp(true, '已经清空代办事项列表', {});
+      } else {
+        ctx.body = genResp(false, '清空列表失败', err);
+      }
+    } else {
+      ctx.body = genResp(false, '未获取有效事项ID', {});
+    }
+  },
+  modifyItem: async ctx => {
+    const data = ctx.request.body;
+    const { todoId, todoItem, todoTitle, startTime, endTime } = data;
+    console.log(data);
+    const _startTime = timeFormat(startTime);
+    const _endTime = timeFormat(endTime);
+
+    const [err, msg] = await to(
+      handler.update(
+        'KOA_TODO',
+        {
+          todoItem,
+          todoTitle,
+          startTime: _startTime,
+          endTime: _endTime
+        },
+        { todoId }
+      )
+    );
+
+    setCtxBody(err, msg, ctx, '修改代办事项成功', '修改代办事项失败');
   }
 };

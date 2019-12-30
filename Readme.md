@@ -179,3 +179,47 @@ elem.todoItem = iconv.decode(elem.todoItem, 'UTF-8');
 const _startTime = moment(new Date(startTime)).format('YYYY-MM-DD HH:mm:ss');
 const _endTime = moment(new Date(endTime)).format('YYYY-MM-DD HH:mm:ss');
 ```
+
+#### 7. 在 canvas 中添加外部字体写 text 的方法
+
+```javascript
+// 这里创建一个link导入本地的@font-face
+const link = document.createElement('link') as HTMLLinkElement;
+link.rel = "stylesheet";
+link.type = "text/css";
+link.href = "../../static/style/mixins.css";
+
+document.getElementsByTagName('head')[0].appendChild(link);
+
+var image = new Image;
+image.src = link.href;
+image.onerror = function() {
+  ctx.font = "100px betty";
+  ctx.textAlign = "center";
+  ctx.strokeText('Blog', 0, 0);
+}
+```
+
+// css这里导入一个@font-face
+~~~css
+@font-face {
+  font-family: betty;
+  src: url('../font/bellada\ personal\ license.ttf');
+}
+
+.header {
+  font-family: 'betty';
+}
+~~~
+
+上面的步骤操作完可能还没有能拿到字体，简单粗暴的解决办法
+
+~~~html
+
+<div className="header">
+  <canvas width="600" height="300" id="plot"></canvas>
+</div>
+
+~~~
+
+这样即可导入外部字体

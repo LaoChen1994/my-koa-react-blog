@@ -26,9 +26,12 @@ export interface ITodoInfo {
   isComplete: boolean;
   todoTitle: string;
   todoId: number;
+  isExpire: boolean;
 }
 
-export type TAddTodoProps = Omit<ITodoInfo, 'todoId'>;
+export type TAddTodoProps = Omit<ITodoInfo, 'todoId' | 'isExpire'>;
+export type TAddModifyProps = Omit<ITodoInfo, 'userId' | 'isExpire'>;
+
 export type TUserRegister = (
   username: string,
   password: string,
@@ -52,8 +55,20 @@ export type TAddTodoItem = (
   e: TAddTodoProps
 ) => Promise<ICommonApiInterface<Omit<IStatus, 'token'>>>;
 
+export type TModifyTodoItem = (
+  e: TAddModifyProps
+) => Promise<ICommonApiInterface<Omit<IStatus, 'token'>>>;
+
 export type TGetTodoList = (
   userId: number
 ) => Promise<
   ICommonApiInterface<{ data: Omit<IStatus, 'token'> & { data: ITodoInfo[] } }>
 >;
+
+export type TFinishItem = (
+  todoId: number
+) => Promise<ICommonApiInterface<IStatus>>;
+
+export type TClearAll = (
+  todoIds: number[]
+) => Promise<ICommonApiInterface<IStatus>>;
