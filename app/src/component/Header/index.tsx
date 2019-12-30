@@ -102,6 +102,10 @@ export const Header: React.FC<Props> = props => {
     userInfo && dispatch({ type: 'login', payload: userInfo });
   }, [userInfo, dispatch]);
 
+  const linkToHome = () => {
+    history.push('/home')
+  }
+
   return (
     <div className={styles.header}>
       <div className={styles.body}>
@@ -109,6 +113,7 @@ export const Header: React.FC<Props> = props => {
           src={require('../../static/image/logo.png')}
           alt="logo"
           className={styles.avatar}
+          onClick={linkToHome}
         />
         <div className={styles.content}>
           {state.isLogin ? renderLogin() : renderLogout()}

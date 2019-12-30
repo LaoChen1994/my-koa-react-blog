@@ -1,0 +1,36 @@
+@import '../../static/style/mixins.scss';
+
+.header {
+  font-family: 'betty';
+}
+
+.banner {
+  width: 500px;
+  margin: 50px auto;
+}
+
+.show {
+ animation: fadeIn 2s ease-out;
+ animation-fill-mode: backwards; 
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(500px);
+  }
+  
+  75% {
+    opacity: 0.2;
+    // transform: translateY(100px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.controller {
+  text-align: center;
+}

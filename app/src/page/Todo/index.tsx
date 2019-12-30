@@ -5,10 +5,12 @@ import {
   DragWrapper,
   DragElement
 } from '../../component/DragComponent';
-import { Button, Dialog, Tag } from 'zent';
+import { Button, Dialog, Tag, Notify } from 'zent';
 import { AddTodoForm } from './AddTodoForm';
+import { CardContent } from './CardContent';
+
 import { UserContext } from '../../store/users';
-import { getTodoList } from '../../api/todo';
+import { getTodoList, finishItem, recallItem, clearAll } from '../../api/todo';
 import { ITodoInfo } from '../../api/interface';
 import { MyCard, ICardProps, TCardSlidUp } from '../../component/MyCard';
 
@@ -17,7 +19,11 @@ interface Props {}
 export const TodoList: React.FC<Props> = () => {
   const { state } = useContext(UserContext);
   const { userId } = state;
-  const [todoList, setTodoList] = useState<ITodoInfo[]>([]);
+  const [_upd, setUpd] = useState<number>(0);
+
+  const [solvedList, setSolved] = useState<ITodoInfo[]>([]);
+  const [unsolvedList, setUnsolved] = useState<ITodoInfo[]>([]);
+  const [dropItemId, setDropItemId] = useState<number>(-1);
 
   const openAddDialog = useCallback(() => {
     const { openDialog, closeDialog } = Dialog;
@@ -29,19 +35,37 @@ export const TodoList: React.FC<Props> = () => {
     openDialog({
       dialogId: 'addTodoDialog',
       title: '添加代办事项',
-      children: <AddTodoForm userId={userId} closeDialog={close}></AddTodoForm>,
+      children: (
+        <AddTodoForm
+          userId={userId}
+          closeDialog={close}
+          callback={() => {
+            setUpd(_upd + 1);
+          }}
+          type="add"
+        ></AddTodoForm>
+      ),
       style: { width: '50%' }
     });
   }, [state]);
 
   useEffect(() => {
     async function getTodo() {
-      const { data } = await getTodoList(userId);
-      const { data: todoList = [] } = data.data;
-      setTodoList(todoList);
+      if (userId && userId !== -1) {
+        const { data } = await getTodoList(userId);
+        const { data: todoList = [] } = data.data;
+
+        const solvedList = todoList.filter(elem => elem.isComplete);
+        const unsolvedList = todoList.filter(elem => !elem.isComplete);
+
+        console.log(unsolvedList, solvedList);
+
+        setUnsolved(unsolvedList);
+        setSolved(solvedList);
+      }
     }
     getTodo();
-  }, [userId]);
+  }, [userId, _upd]);
 
   const cardToggle: ICardProps['cardToggle'] = (isShow, toggle) => {
     if (!isShow) {
@@ -50,7 +74,10 @@ export const TodoList: React.FC<Props> = () => {
   };
 
   const noteRender = (info: ITodoInfo) => () => {
-    const { todoId, isComplete, todoItem } = info;
+    const { todoId, isComplete, todoItem, isExpire, endTime } = info;
+
+    const workExpire = new Date(endTime) < new Date();
+
     return (
       <div className={styles.noteWrapper}>
         <span className={styles.noteId}>ID: {todoId}</span>
@@ -58,80 +85,139 @@ export const TodoList: React.FC<Props> = () => {
           <div>{todoItem}</div>
         </span>
         <div className={styles.tag}>
-          <Tag theme={isComplete ? 'green' : 'red'} outline>
+          <Tag
+            theme={isComplete ? 'green' : 'red'}
+            outline
+            style={{ marginRight: '10px' }}
+          >
             {isComplete ? '已完成' : '未完成'}
           </Tag>
+          {isComplete ? (
+            isExpire ? (
+              <Tag theme="green" outline>
+                按时完成
+              </Tag>
+            ) : (
+              <Tag theme="yellow" outline>
+                延期完成
+              </Tag>
+            )
+          ) : workExpire ? (
+            <Tag theme="red">延期中</Tag>
+          ) : null}
         </div>
       </div>
     );
   };
 
-  const contentRender = (info: ITodoInfo, slideUp: TCardSlidUp) => () => {
-    const { todoItem } = info;
+  const handleElemDrop = (setStatus: boolean) => async () => {
+    const { data } = setStatus
+      ? await finishItem(dropItemId)
+      : await recallItem(dropItemId);
+    if (data.status) {
+      Notify.success(`${data.msg}，请刷新查看任务状态`);
+      window.location.reload();
+    } else {
+      Notify.error(`${data.msg}, 请重试`);
+    }
+  };
 
-    return (
-      <div className={styles.todoCon}>
-        <div className={styles.content}>
-          <div className={styles.detail}>
-            <div className={styles.subtitle}>事件详情:</div>
-            <div className={styles.detailContent}>{todoItem}</div>
-          </div>
-          <div className={styles.subController}>
-            <Button
-              type="success"
-              onClick={slideUp}
-            >
-              完成
-            </Button>
-            <Button type="error" outline>
-              取消
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+  const deleteAll = async () => {
+    const todoIds = unsolvedList.map(elem => elem.todoId);
+    const { data } = await clearAll(todoIds);
+
+    if (data.status) {
+      setUnsolved([]);
+    }
   };
 
   return (
     <div className={styles.wrapper}>
       <DragStore>
-        <DragWrapper className={styles.drageWrapper}>
+        <div className={styles.drageWrapper}>
           <div className={styles.title}>Todo</div>
-          {todoList.map((elem, index) => (
-            <DragElement key={`todoItem-${index}`}>
-              {/* 
-              //@ts-ignore */}
-              <MyCard
-                title={elem.todoTitle}
-                trigger="click"
-                noteRender={noteRender(elem)}
-                // @ts-ignore
-                style={{ margin: '10px auto' }}
-                cardToggle={cardToggle}
+          <DragWrapper
+            useStyle="custom"
+            className={styles.todoContent}
+            dropCallback={handleElemDrop(false)}
+          >
+            {unsolvedList.map((elem, index) => (
+              <DragElement
+                key={`todoItem-${index}`}
+                onDragStart={() => {
+                  setDropItemId(elem.todoId);
+                }}
               >
-                {({ slideUp }: { slideUp: TCardSlidUp }) =>
-                  contentRender(elem, slideUp)()
-                }
-              </MyCard>
-            </DragElement>
-          ))}
+                {/* 
+                //@ts-ignore */}
+                <MyCard
+                  title={elem.todoTitle}
+                  trigger="click"
+                  noteRender={noteRender(elem)}
+                  // @ts-ignore
+                  style={{ margin: '10px auto' }}
+                  cardToggle={cardToggle}
+                >
+                  {({ slideUp }: { slideUp: TCardSlidUp }) => (
+                    <CardContent
+                      slideUp={slideUp}
+                      upd={_upd}
+                      setUpdate={setUpd}
+                      info={elem}
+                    ></CardContent>
+                  )}
+                </MyCard>
+              </DragElement>
+            ))}
+          </DragWrapper>
 
           <div className={styles.controller}>
             <Button type="primary" size="medium" onClick={openAddDialog}>
               添加任务
             </Button>
-            <Button type="danger" outline size="medium">
+            <Button type="danger" outline size="medium" onClick={deleteAll}>
               清空任务
             </Button>
           </div>
-        </DragWrapper>
+        </div>
 
-        <DragWrapper className={styles.drageWrapper}>
+        <div className={styles.drageWrapper}>
           <div className={styles.title}>Finished</div>
-          <DragElement>
-            <div>456789</div>
-          </DragElement>
-        </DragWrapper>
+          <DragWrapper
+            useStyle="custom"
+            className={styles.todoContent}
+            dropCallback={handleElemDrop(true)}
+          >
+            {solvedList.map((elem, index) => (
+              <DragElement
+                key={`todoItem-${index}`}
+                onDragStart={() => {
+                  setDropItemId(elem.todoId);
+                }}
+              >
+                {/* 
+                //@ts-ignore */}
+                <MyCard
+                  title={elem.todoTitle}
+                  trigger="click"
+                  noteRender={noteRender(elem)}
+                  // @ts-ignore
+                  style={{ margin: '10px auto' }}
+                  cardToggle={cardToggle}
+                >
+                  {({ slideUp }: { slideUp: TCardSlidUp }) => (
+                    <CardContent
+                      slideUp={slideUp}
+                      upd={_upd}
+                      setUpdate={setUpd}
+                      info={elem}
+                    ></CardContent>
+                  )}
+                </MyCard>
+              </DragElement>
+            ))}
+          </DragWrapper>
+        </div>
       </DragStore>
     </div>
   );

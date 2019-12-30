@@ -17,12 +17,30 @@
 }
 
 .wrapper .drageWrapper {
+  display: flex;
+  flex-direction: column;
   width: 40%;
   border: #fff;
   box-shadow: 0 0 10px rgba(#33bbff, 0.7);
   overflow: auto;
   position: relative;
   outline: none;
+  height: 400px;
+  box-sizing: border-box;
+  padding: 20px;
+
+  &:hover {
+    box-shadow: 0 0 10px rgba(#f44, 0.5);
+
+  }
+
+  @media screen and (min-height: 800px) {
+    height: 600px;
+  }
+  @media screen and (min-height: 1000px) {
+    height: 800px;
+  }
+
 }
 
 .title {
@@ -30,13 +48,14 @@
 }
 
 .controller {
-  position: absolute;
-  bottom: 0;
-  right: 20px;
   text-align: right;
   padding: 20px 0;
   display: block;
   box-sizing: border-box;
+}
+
+.dragArea {
+  padding: 0 10px;
 }
 
 .formController {
@@ -49,7 +68,7 @@
 }
 
 .noteId {
-  flex: 0 30%;
+  flex: 0 20%;
 }
 
 .noteTitle {
@@ -64,13 +83,20 @@
 }
 
 .tag {
-  width: 50px;
+  width: 120px;
   display: flex;
   justify-content: center;
 }
 
 .content {
   padding: 10px 0 0;
+}
+
+.todoContent {
+  flex: 1;
+  overflow: auto;
+  padding: 0 10px;
+  outline: none;
 }
 
 .workStatus {

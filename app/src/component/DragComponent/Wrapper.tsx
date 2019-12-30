@@ -6,10 +6,12 @@ import { DragContext } from './store';
 
 interface Props {
   className?: string;
+  useStyle?: 'default' | 'custom' | 'both';
+  dropCallback?: (node: HTMLElement) => void;
 }
 
 export const DragWrapper: React.FC<Props> = props => {
-  const { children, className = '' } = props;
+  const { children, className = '', useStyle = 'default', dropCallback } = props;
   const { Factory } = useContext(DragContext);
   const [isFocus, setFocus] = useState<boolean>(false);
   const divEl = useRef<HTMLDivElement>(null);
@@ -27,6 +29,7 @@ export const DragWrapper: React.FC<Props> = props => {
     const _htmlNode = Factory.getHtmlNode(_str);
     const { current } = divEl;
     current && _htmlNode && current.append(_htmlNode);
+    dropCallback && _htmlNode && dropCallback(_htmlNode);
   };
 
   const handleFocus = () => {
@@ -36,9 +39,9 @@ export const DragWrapper: React.FC<Props> = props => {
   return (
     <div
       className={cx({
-        [style.wrapper]: true,
-        [style.active]: isFocus,
-        [className]: true
+        [style.wrapper]: ['default', 'both'].includes(useStyle),
+        [style.active]: isFocus && ['default', 'both'].includes(useStyle),
+        [className]: useStyle === 'custom'
       })}
       draggable={false}
       onDragEnter={handleDragenter}
@@ -48,7 +51,6 @@ export const DragWrapper: React.FC<Props> = props => {
       onMouseLeave={() => setFocus(false)}
       ref={divEl}
       tabIndex={1}
-      
     >
       {children}
     </div>

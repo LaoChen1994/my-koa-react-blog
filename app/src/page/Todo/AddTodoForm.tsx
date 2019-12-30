@@ -10,17 +10,25 @@ import {
 } from 'zent';
 
 import styles from './style.module.scss';
-import { addTodoItem } from '../../api/todo';
+import { addTodoItem, modifyItem } from '../../api/todo';
 import { IAddTodoFormProps } from './interface';
+import { ITodoInfo } from '../../api/interface';
 
-interface Props {
-  userId: number;
+export interface IAddTodoProps {
+  userId?: number;
+  todoId?: number;
   closeDialog: () => void;
+  callback?: () => void;
+  defaultValue?: Pick<
+    ITodoInfo,
+    'todoTitle' | 'todoItem' | 'startTime' | 'endTime'
+  >;
+  type: 'add' | 'update';
 }
 
-export const AddTodoForm: React.FC<Props> = props => {
+export const AddTodoForm: React.FC<IAddTodoProps> = props => {
   const form = Form.useForm(FormStrategy.View);
-  const { userId, closeDialog } = props;
+  const { userId = -1, closeDialog, callback, type, defaultValue, todoId = -1 } = props;
 
   const handleSubnmit = async () => {
     const {
@@ -30,18 +38,29 @@ export const AddTodoForm: React.FC<Props> = props => {
       //@ts-ignore
     } = form.getValue() as IAddTodoFormProps;
 
-    const { data } = await addTodoItem({
-      userId: userId,
-      todoItem,
-      startTime: timeRange[0],
-      endTime: timeRange[1],
-      todoTitle,
-      isComplete: false
-    });
+    const { data = { status: '', msg: '' } } =
+      type === 'add'
+        ? await addTodoItem({
+            userId: userId,
+            todoItem,
+            startTime: timeRange[0],
+            endTime: timeRange[1],
+            todoTitle,
+            isComplete: false
+          })
+        : await modifyItem({
+            todoId,
+            todoItem,
+            startTime: timeRange[0],
+            endTime: timeRange[1],
+            todoTitle,
+            isComplete: false
+          });
 
     if (data.status) {
       Notify.success(data.msg);
       closeDialog();
+      callback && callback();
     } else {
       Notify.error(data.msg);
     }
@@ -50,25 +69,30 @@ export const AddTodoForm: React.FC<Props> = props => {
   return (
     <Form form={form} layout="horizontal">
       <FormInputField
-        name="todoItem"
+        name="todoTitle"
         label="代办事项名称"
         required
         validators={[Validators.required('代办事项名称必填!')]}
+        defaultValue={defaultValue && defaultValue.todoTitle}
       ></FormInputField>
       <FormDateRangePickerField
         name="timeRange"
         label="起始结束时间"
         required
         validators={[Validators.required('请选择有效时间区间')]}
+        defaultValue={
+          defaultValue && [defaultValue.startTime, defaultValue.endTime]
+        }
       ></FormDateRangePickerField>
       <FormInputField
-        name="todoTitle"
+        name="todoItem"
         label="代办详情"
         props={{ type: 'textarea' }}
+        defaultValue={defaultValue && defaultValue.todoItem}
       ></FormInputField>
       <div className={styles.formController}>
         <Button type="primary" onClick={handleSubnmit}>
-          添加
+          {type === 'add' ? '添加' : '修改'}
         </Button>
         <Button type="danger" outline onClick={() => form.resetValue()}>
           重置
