@@ -87,7 +87,7 @@ export const AddTodoForm: React.FC<IAddTodoProps> = props => {
       <FormInputField
         name="todoItem"
         label="代办详情"
-        props={{ type: 'textarea' }}
+        props={{ type: 'textarea', width: '60%' }}
         defaultValue={defaultValue && defaultValue.todoItem}
       ></FormInputField>
       <div className={styles.formController}>

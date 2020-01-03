@@ -7,6 +7,7 @@ router.get('/finishItem', TodoController.finishItem);
 router.get('/recallTodo', TodoController.recallTodo);
 router.get('/deleteTodo', TodoController.deleteTodo);
 router.post('/clearAll', TodoController.clearAll);
-router.post('/modify', TodoController.modifyItem)
+router.post('/modify', TodoController.modifyItem);
+router.get('/alterEvent', TodoController.alterEvent)
 
 module.exports = router;

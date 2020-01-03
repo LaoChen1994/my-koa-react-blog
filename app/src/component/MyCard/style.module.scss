@@ -17,12 +17,11 @@
 .content {
   max-height: 0px;
   overflow-y: hidden;
-  transition: max-height 1s ease;
+  transition: max-height 2s ease;
 }
 
 .showContent {
-  // padding: 10px 0;
-  max-height: 200px;
+  max-height: 500px;
 }
 
 .briefNote {

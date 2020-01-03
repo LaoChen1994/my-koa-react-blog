@@ -58,7 +58,7 @@ module.exports = UserController = {
         password
       };
 
-      const token = jwt.sign(userInfo, 'my_token', { expiresIn: '2h' });
+      const token = jwt.sign(userInfo, 'my_token', { expiresIn: '864000000' });
 
       ctx.body = {
         status: true,

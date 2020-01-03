@@ -48,6 +48,10 @@ module.exports = TodoController = {
     const { userId } = ctx.query;
     const sql = `select * from KOA_TODO where userId=${userId}`;
     let [error, data] = await to(query(sql));
+
+    // let count = await handler.queryCount('KOA_TODO', ['*'], { userId });
+    // console.log(count[0]['COUNT(\'*\')']);
+
     if (!error) {
       data = data.map(elem => {
         elem.todoItem = iconv.decode(elem.todoItem, 'UTF-8');
@@ -70,6 +74,7 @@ module.exports = TodoController = {
     const { todoId } = ctx.query;
     const sql = `select * from KOA_TODO where todoId=${todoId}`;
     let isExpire = false;
+    let completeTime = timeFormat(new Date().toString());
     const [err, data] = await to(query(sql));
 
     if (!err & data.length) {
@@ -84,7 +89,11 @@ module.exports = TodoController = {
 
     if (todoId && todoId !== -1) {
       const [err, data] = await to(
-        handler.update('KOA_TODO', { isComplete: true, isExpire }, { todoId })
+        handler.update(
+          'KOA_TODO',
+          { isComplete: true, isExpire, completeTime },
+          { todoId }
+        )
       );
       setCtxBody(err, data, ctx, '对应事件已完成', '项目完成失败');
     } else {
@@ -95,7 +104,11 @@ module.exports = TodoController = {
     const { todoId } = ctx.query;
     if (todoId && todoId !== -1) {
       const [err, data] = await to(
-        handler.update('KOA_TODO', { isComplete: false }, { todoId })
+        handler.update(
+          'KOA_TODO',
+          { isComplete: false, completeTime: null },
+          { todoId }
+        )
       );
       setCtxBody(err, data, ctx, '已撤回执行状态', '撤回失败');
     } else {
@@ -151,5 +164,29 @@ module.exports = TodoController = {
     );
 
     setCtxBody(err, msg, ctx, '修改代办事项成功', '修改代办事项失败');
+  },
+  alterEvent: async ctx => {
+    const { type: isHistory, userId } = ctx.query;
+
+    if (~userId) {
+      let sql = `select * from KOA_TODO where userId=${userId} and isComplete=true and DATE_FORMAT(completeTime,\'%Y%m%d\')=DATE_FORMAT(CURRENT_DATE(),\'%Y%m%d\')`;
+      if (isHistory === 'true') {
+        sql = `select * from KOA_TODO where userId=${userId} and isComplete=true`;
+      }
+
+      const [err, data] = await to(query(sql));
+
+      const _data = data.map(elem => {
+        elem.startTime = timeFormat(elem.startTime);
+        elem.endTime = timeFormat(elem.endTime);
+        elem.todoItem = iconv.decode(elem.todoItem, 'UTF-8');
+        elem.completeTime = timeFormat(elem.completeTime);
+        return elem;
+      });
+
+      setCtxBody(err, _data, ctx, '', '');
+    } else {
+      setCtxBody(1, {}, ctx, '用户不存在', '');
+    }
   }
 };

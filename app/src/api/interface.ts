@@ -11,6 +11,19 @@ export interface IStatus {
   token: string;
 }
 
+export interface IData<T> {
+  data: T;
+}
+
+export interface IBlogInfo {
+  blogId: number;
+  blogName: string;
+  publishDate: Date;
+  lastUpdateTime: Date;
+  blogContent: string;
+  authorId: number;
+}
+
 export type TUserLogin = (
   username?: string,
   password?: string
@@ -72,3 +85,17 @@ export type TFinishItem = (
 export type TClearAll = (
   todoIds: number[]
 ) => Promise<ICommonApiInterface<IStatus>>;
+
+export type TGetUndoList = (
+  userId: number
+) => Promise<ICommonApiInterface<IStatus & IData<{ undoList: ITodoInfo[] }>>>;
+
+export type TGetBlogList = (
+  pageSize: number,
+  currentPage: number
+) => Promise<ICommonApiInterface<IStatus & IData<{ blogList: IBlogInfo[] }>>>;
+
+export type TGetCompleteList = (
+  userId: number,
+  type: boolean
+) => Promise<ICommonApiInterface<IStatus & { data: ITodoInfo[] }>>;

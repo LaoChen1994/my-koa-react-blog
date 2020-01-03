@@ -1,0 +1,6 @@
+@import '../../static/style/mixins.scss';
+
+.wrapper {
+  @extend .pageWidth;
+  @extend .blockBorder;
+}

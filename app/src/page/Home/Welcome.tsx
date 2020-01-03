@@ -65,27 +65,23 @@ const Welcome: React.FC<Props> = () => {
       ctx.save();
 
       ctx.clearRect(0, 0, 200, 300);
-
       ctx.translate(100, 150);
-      // 初始化圆
-      // ctx.beginPath();
-      // ctx.strokeStyle = '#cfb495';
-      // ctx.arc(0, 0, 100, 0, degToArc(360));
-      // ctx.closePath();
-      // ctx.stroke();
 
-      // ctx.beginPath();
-      // ctx.translate(0, 0);
-      // ctx.arc(0, 0, 50, 0, degToArc(360));
-      // ctx.closePath();
-      // ctx.stroke();
+      if (NUM % MAX_NUM === 0) {
+        if ((NUM / MAX_NUM) % 2 === 0) {
+          type = 'add';
+        } else {
+          type = 'clear';
+        }
+      }
 
-      for (let i = 0; i < NUM % 60; i++) {
+      let stripNum = type === 'add' ? NUM % MAX_NUM : MAX_NUM - (NUM % MAX_NUM);
+
+      for (let i = 0; i < stripNum; i++) {
         const angle = (i * 360) / MAX_NUM;
         const { corrdX: bX, corrdY: bY } = bigR(angle);
         const { corrdX: sX, corrdY: sY } = smallR(angle);
 
-        // if (!(NUM % MAX_NUM)) {
         color =
           '#' +
           (Math.random() * 0xffffff)
@@ -93,7 +89,6 @@ const Welcome: React.FC<Props> = () => {
             .substr(0, 6)
             .toUpperCase()
             .padEnd(6, '0');
-        // }
 
         ctx.beginPath();
         ctx.moveTo(sX, sY);

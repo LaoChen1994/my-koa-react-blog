@@ -15,7 +15,8 @@ module.exports = {
   },
   setCtxBody: (error, data, ctx, okMsg, errorMsg) => {
     if (!error) {
-      data = data | {};
+      console.log(data);
+      data = data || {};
       ctx.body = genResp(true, okMsg, data);
     } else {
       errorMsg = errorMsg | '内部服务器错误';

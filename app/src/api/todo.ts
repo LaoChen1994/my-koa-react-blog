@@ -3,7 +3,8 @@ import {
   TGetTodoList,
   TFinishItem,
   TClearAll,
-  TModifyTodoItem
+  TModifyTodoItem,
+  TGetCompleteList
 } from './interface';
 import axios from 'axios';
 import { ApiHost } from '../constant';
@@ -30,3 +31,11 @@ export const clearAll: TClearAll = todoIds =>
 
 export const modifyItem: TModifyTodoItem = itemInfo =>
   axios.post(`${URL}/modify`, { ...itemInfo });
+
+export const getCompleteList: TGetCompleteList = (userId, type) =>
+  axios.get(`${URL}/alterEvent`, {
+    params: {
+      userId,
+      type
+    }
+  });
