@@ -22,6 +22,7 @@
   box-sizing: border-box;
   padding: 20px;
 
+  @extend .pageBackground;
   @include pageFadeIn(1s);
 
   &:hover {

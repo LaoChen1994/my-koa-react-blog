@@ -34,19 +34,22 @@
   padding: 20px;
   box-sizing: border-box;
   @extend .blockBorder;
+  @extend .pageBackground;
 }
 
 .itemTitle {
   @extend .subtitle;
 }
 
+
 .blogList {
   flex: 1;
   padding: 20px;
   box-sizing: border-box;
   margin-left: 10px;
-  @extend .blockBorder;
   min-height: 600px;
+  @extend .blockBorder;
+  @extend .pageBackground
 }
 
 .errorEvent {

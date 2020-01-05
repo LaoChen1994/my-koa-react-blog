@@ -2,6 +2,13 @@ export type UserAction =
   | { type: 'login'; payload: IUserState }
   | { type: 'logout' };
 
+export interface IBlogTag {
+  tagId: number;
+  tagName: string;
+  userId: IUserState['userId'];
+  articalNumber: number;
+}
+
 export interface IUserState {
   username: string;
   userId: number;

@@ -14,7 +14,7 @@ import { Register } from '../../page/Register';
 import { TodoList } from '../../page/Todo';
 import NotFound from '../NotFound';
 import { Blog } from '../Blog';
-import BlogEdit from '../WriteBlog';
+import {WriteBlog} from '../WriteBlog';
 
 import { getHome } from '../../api/home';
 import { initUserInfo } from '../../constant';
@@ -75,7 +75,7 @@ const RouterPage: React.FC = () => {
             <Blog></Blog>
           </Route>
           <Route exact path="/blogEdit">
-            <BlogEdit></BlogEdit>
+            <WriteBlog></WriteBlog>
           </Route>
           <Route exact path="/404">
             <NotFound></NotFound>

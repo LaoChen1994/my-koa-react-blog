@@ -200,8 +200,9 @@ image.onerror = function() {
 }
 ```
 
-// css这里导入一个@font-face
-~~~css
+// css 这里导入一个@font-face
+
+```css
 @font-face {
   font-family: betty;
   src: url('../font/bellada\ personal\ license.ttf');
@@ -210,43 +211,43 @@ image.onerror = function() {
 .header {
   font-family: 'betty';
 }
-~~~
+```
 
 上面的步骤操作完可能还没有能拿到字体，简单粗暴的解决办法
 
-~~~html
-
+```html
 <div className="header">
   <canvas width="600" height="300" id="plot"></canvas>
 </div>
-
-~~~
+```
 
 这样即可导入外部字体
 
+#### 8. 优雅的处理 async/await 中的异常
 
-#### 8. 优雅的处理async/await中的异常
-
-~~~javascript
-
+```javascript
 // 模拟一个Promise的事件
 
-const getRandom = () => new Promise((resolve, reject) => {
-  const num = Math.random() * 5;
-  if(num < 0.5) {
-    resolve({status: true, data: num});
-  } else {
-    reject({status: false})
-  }
-})
+const getRandom = () =>
+  new Promise((resolve, reject) => {
+    const num = Math.random() * 5;
+    if (num < 0.5) {
+      resolve({ status: true, data: num });
+    } else {
+      reject({ status: false });
+    }
+  });
 
-const to = promise => promise.then(data => {
-  console.log('success', data)
-  return [null, data]
-}).catch(err => {
-  console.log('faild', err)
-  return [err]
-})
+const to = promise =>
+  promise
+    .then(data => {
+      console.log('success', data);
+      return [null, data];
+    })
+    .catch(err => {
+      console.log('faild', err);
+      return [err];
+    });
 
 async function catchError() {
   const [err, data] = await to(getRandom());
@@ -254,25 +255,24 @@ async function catchError() {
   console.log(err, data);
 }
 
-catchError()
+catchError();
+```
 
-~~~
-
-#### 9. React Hooks中useRef, useImperativeHandle, forwardRef的使用方法
+#### 9. React Hooks 中 useRef, useImperativeHandle, forwardRef 的使用方法
 
 ##### 1. 三者用处
 
-1. useRef: 用于获取元素的原生DOM或者获取自定义组件所暴露出来的ref方法(父组件可以通过ref获取子组件，并调用相对应子组件中的方法)
-2. useImperativeHandle:在函数式组件中，用于定义暴露给父组件的ref方法。
-3. React.forwardRef: 将ref父类的ref作为参数传入函数式组件中，本身props只带有children这个参数，这样可以让子类转发父类的ref,当父类把ref挂在到子组件上时，子组件外部通过forwrardRef包裹，可以直接将父组件创建的ref挂在到子组件的某个dom元素上
+1. useRef: 用于获取元素的原生 DOM 或者获取自定义组件所暴露出来的 ref 方法(父组件可以通过 ref 获取子组件，并调用相对应子组件中的方法)
+2. useImperativeHandle:在函数式组件中，用于定义暴露给父组件的 ref 方法。
+3. React.forwardRef: 将 ref 父类的 ref 作为参数传入函数式组件中，本身 props 只带有 children 这个参数，这样可以让子类转发父类的 ref,当父类把 ref 挂在到子组件上时，子组件外部通过 forwrardRef 包裹，可以直接将父组件创建的 ref 挂在到子组件的某个 dom 元素上
 
-##### 2. 一个React.forwardRef的例子
+##### 2. 一个 React.forwardRef 的例子
 
-~~~javascript
+```javascript
 function InputWithLabel(props) {
   // 这里的myRef为通过外部打入的父级ref节点
   const { label, myRef } = props;
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const handleChange = e => {
     const value = e.target.value;
     setValue(value);
@@ -304,34 +304,34 @@ function App() {
 
   return (
     <div className="App">
-      <RefInput label={"姓名"} ref={myRef} />
+      <RefInput label={'姓名'} ref={myRef} />
       <button onClick={handleFocus}>focus</button>
     </div>
   );
 }
-~~~
+```
 
 **结果**
 
 ![](./img/Peek 2020-01-03 09-51.gif)
 
-结果分析：<font color=red>**通过focus直接子元素中input的DOM节点**</font>
+结果分析：<font color=red>**通过 focus 直接子元素中 input 的 DOM 节点**</font>
 
 ##### 3. 存在问题
 
-这样我们的Ref获得的是整个节点，但是有时候我们通过ref只需要暴露一部分参数就行了，为了解决这个问题，我们就需要用到useImperativeHandle来指定放出一部分我们需要的方法或者属性给父级
+这样我们的 Ref 获得的是整个节点，但是有时候我们通过 ref 只需要暴露一部分参数就行了，为了解决这个问题，我们就需要用到 useImperativeHandle 来指定放出一部分我们需要的方法或者属性给父级
 
-##### 4. 使用forwardRef和useImperativeHandle的方案
+##### 4. 使用 forwardRef 和 useImperativeHandle 的方案
 
-+ 思路：
-  + 子组件内部自建一个_innerRef来获取ref元素
-  + 将通过forwarfRef传入的ref元素通过useImperativeHandle来进行绑定，指定该子组件对外暴露的方法或属性
-  + 通过_innerRef调用响应的方法然后同时在useImperativeHandle中写代码即可，这样可以只暴露一部分方法属性，而不是整个底层的input原生DOM节点
+- 思路：
+  - 子组件内部自建一个\_innerRef 来获取 ref 元素
+  - 将通过 forwarfRef 传入的 ref 元素通过 useImperativeHandle 来进行绑定，指定该子组件对外暴露的方法或属性
+  - 通过\_innerRef 调用响应的方法然后同时在 useImperativeHandle 中写代码即可，这样可以只暴露一部分方法属性，而不是整个底层的 input 原生 DOM 节点
 
-~~~javascript
+```javascript
 function InputWithLabel(props) {
   const { label, myRef } = props;
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const _innerRef = useRef(null);
   const handleChange = e => {
     const value = e.target.value;
@@ -362,29 +362,25 @@ function InputWithLabel(props) {
     </div>
   );
 }
-~~~
+```
 
 ##### 5. 结果
 
 ![](./img/Peek 2020-01-03 10-07.gif)
 
-
-
-结果分析：<font color=red>**通过focus只能获取我们指定向外暴露那部分的方法**</font>
-
-
+结果分析：<font color=red>**通过 focus 只能获取我们指定向外暴露那部分的方法**</font>
 
 ##### 6. 完整代码
 
-~~~javascript
-import React, { useRef, useState, useImperativeHandle } from "react";
-import ReactDOM from "react-dom";
+```javascript
+import React, { useRef, useState, useImperativeHandle } from 'react';
+import ReactDOM from 'react-dom';
 
-import "./styles.css";
+import './styles.css';
 
 function InputWithLabel(props) {
   const { label, myRef } = props;
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const _innerRef = useRef(null);
   const handleChange = e => {
     const value = e.target.value;
@@ -431,16 +427,246 @@ function App() {
 
   return (
     <div className="App">
-      <RefInput label={"姓名"} ref={myRef} />
+      <RefInput label={'姓名'} ref={myRef} />
       <button onClick={handleFocus}>focus</button>
     </div>
   );
 }
 
-const rootElement = document.getElementById("root");
+const rootElement = document.getElementById('root');
 ReactDOM.render(<App />, rootElement);
-~~~
+```
 
+#### 10 . React 图片上传问题
 
+- 通过 base64 前端处理图片为 base64 的解决方案
+  - 利用 FileReader 对数据进行读取，如果是图片会将图片读取为 base64 的形式
+  - 将得到的 base64 的字符串传给后端
+  - 后端解析 base64 的字符串为图片即可
 
-##### 
+[参考博文](https://blog.csdn.net/dreamer2020/article/details/51794450)
+
+- 代码实现
+
+```javascript
+function App() {
+  const handleFileChange = e => {
+    const file = e.currentTarget.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function() {
+      // reader.results当完成onload后会将图片转为base64
+      // 后端只要解析base64对应的字符串即可
+      const result = this.result;
+      console.log(result);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="App">
+      <input type="file" onChange={handleFileChange} />
+    </div>
+  );
+}
+```
+
+#### 11. zent 封装表单组件
+
+##### 1. 利用 zent 的几个组件
+
+- FormControl: 包裹封装组件，用于为封装的表单组件提供 label, invalid 等参数，与其他封装的表单组件统一格式
+- FieldSet: 包裹封装的外部组件，当 FormStrategy.View 时，为上级托管的 Form 组件添加字段 name
+- Form.useField: 初始化一个 model，包括初始值，键值 key 和值 value。这个 model 中值的改变将会注册到上级的 Form 中
+- FieldUtils 中的几个方法:
+  - useMAppend: 按照顺序从上往下执行回调函数
+  - usePipe: 按顺序执行函数，且上一个函数的返回值将作为下一个函数的输出
+  - makeChangeHandler: 指定一个需要改变 model 的值，注意:源码里这个是一个闭包函数，通过上级传入的 value 直接改传入 model 中对应的值
+
+##### 2. 结合官网例子分析
+
+```javascript
+import React, { useCallback, useState } from 'react';
+import ReactDOM from 'react-dom';
+
+import {
+  Form,
+  Select,
+  NumberInput,
+  FormStrategy,
+  FormControl,
+  Button,
+  FieldSet,
+  Validators,
+  FieldUtils
+} from 'zent';
+
+import 'zent/css/index.css';
+
+const { SelectTrigger } = Select;
+const countyCodeList = [
+  {
+    code: '+86',
+    zh: 'zhongguo',
+    eng: 'china',
+    value: '中国 +86',
+    index: 0
+  },
+  {
+    code: '+853',
+    zh: 'aomen',
+    eng: 'Macau',
+    value: '中国澳门 +853',
+    index: 1
+  }
+];
+
+const filterHandler = (item, keyword) => {
+  return (
+    keyword &&
+    item.text
+      .trim()
+      .toLowerCase()
+      .indexOf(keyword.trim().toLowerCase()) > -1
+  );
+};
+
+function getValue(e) {
+  return e.target.value;
+}
+
+const ContactPhone = () => {
+  const select = Form.useField('areacode', 0);
+  const input = Form.useField('mobile', '', [
+    Validators.pattern(/^\d{1,10}$/, '请输入正确的手机号')
+  ]);
+  // 这个counter并没有挂载在任何表单元素上，直接通过fieldUtils进行修改
+  const counter = Form.useField('counter', 0);
+  const onSelectChange = FieldUtils.useMAppend(
+    useCallback(() => (select.isTouched = true), [select]),
+    FieldUtils.usePipe(getValue, FieldUtils.makeChangeHandler(select))
+  );
+
+  const [countNumber, setCounter] = useState(0);
+
+  const handleChange = FieldUtils.useMAppend(
+    FieldUtils.usePipe(e => {
+      // 这里直接返回counterNumber + 1作为makeChangeHandler的输入值
+      setCounter(countNumber + 1);
+      return countNumber + 1;
+      // 这里指定修改的对象model为counter,之后counter就会发生改变
+    }, FieldUtils.makeChangeHandler(counter)),
+    // 这里直接这样操作的原因是，因为本身NumberInput的回调函数就会传入value，所以直接将value传给makeChangeHandler的回调函数
+    FieldUtils.makeChangeHandler(input, Form.ValidateOption.Default)
+  );
+
+  return (
+    <FormControl
+      className="form-demo-multiple-value"
+      label="联系方式:"
+      invalid={!!select.error || !!input.error}
+    >
+      <Select
+        className="areacode"
+        data={countyCodeList}
+        filter={filterHandler}
+        optionValue="index"
+        optionText="value"
+        trigger={SelectTrigger}
+        width={160}
+        value={select.value}
+        onChange={onSelectChange}
+      />
+      <NumberInput
+        className="phone-num"
+        placeholder="请填写手机号"
+        width={160}
+        value={input.value}
+        {...FieldUtils.useCompositionHandler(input)}
+        onChange={handleChange}
+        onBlur={useCallback(() => {
+          input.isTouched = true;
+          input.validate();
+        }, [input])}
+      />
+      <Form.CombineErrors models={[select, input]} />
+    </FormControl>
+  );
+};
+
+const App = () => {
+  const form = Form.useForm(FormStrategy.View);
+  const getFormValues = useCallback(() => {
+    const values = form.getValue();
+    console.log(values);
+  }, [form]);
+  const resetForm = useCallback(() => {
+    form.resetValue();
+  }, [form]);
+  return (
+    <Form form={form} layout="horizontal">
+      <FieldSet name="contactPhone">
+        <ContactPhone />
+      </FieldSet>
+      <div className="zent-form__form-actions">
+        <Button type="primary" onClick={getFormValues}>
+          获取表单值
+        </Button>{' '}
+        <Button type="primary" outline onClick={resetForm}>
+          重置表单值
+        </Button>
+      </div>
+    </Form>
+  );
+};
+
+const rootElement = document.getElementById('root');
+ReactDOM.render(<App />, rootElement);
+```
+
+#### 11. nodejs mysql 库的几个使用问题解决
+
+**1. 查询插入数据的信息**
+
+通过 query 的回调函数的第二个参数
+
+```javascript
+
+OkPacket {
+  fieldCount: 0,
+  affectedRows: 1, // 所影响几条数据
+  insertId: 1, // 插入的insertId key primary
+  serverStatus: 2,
+  warningCount: 0,
+  message: '',
+  protocol41: true,
+  changedRows: 0 }
+
+```
+
+通过读取该条信息可以获得插入数据的响应信息，特别是在**批量插入**的时候，可以直接获得响应的主键值，后序继续进行操作
+
+##### 1. 一个例子
+
+```javascript
+const oldTagExec = query(oldTagUpdateSql);
+const newTagExec = query(addNewTagsSql);
+
+const [err, data] = await to(Promise.all([oldTagExec, newTagExec]));
+
+if (!err) {
+  const newTagRes = data[1];
+  const { affectedRows, insertId } = newTagRes;
+
+  const tagList = setBlogTags(
+    [
+      // 获得插入新tag的主键值
+      ...oldTags.map(elem => elem.tagId),
+      ...Array.from({ length: affectedRows }).map(
+        (elem, index) => index + insertId
+      )
+    ].sort((x, y) => x - y)
+  );
+}
+```
