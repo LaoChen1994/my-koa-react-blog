@@ -6,6 +6,7 @@ const logger = require('koa-logger');
 const koaBody = require('koa-body');
 const cors = require('koa2-cors');
 const koajwt = require('koa-jwt');
+const { genResp } = require('./utils');
 
 const router = require('./routes/index');
 
@@ -28,7 +29,7 @@ app.use((ctx, next) => {
   return next().catch(err => {
     if (err.status === 401) {
       ctx.status = 401;
-      ctx.body = 'User Verify failed'
+      ctx.body = genResp(false, 'User Verify failed', {})
     } else {
       throw err;
     }

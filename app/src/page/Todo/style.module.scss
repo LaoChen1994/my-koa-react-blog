@@ -2,18 +2,11 @@
 
 .wrapper {
   margin: 100px auto;
-  width: 1000px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 
-  @media screen and (min-width: 1300px) {
-    width: 1100px;
-  }
-
-  @media screen and (min-width: 1600px) {
-    width: 1300px;
-  }
+  @extend .pageWidth;
 }
 
 .wrapper .drageWrapper {
@@ -29,9 +22,11 @@
   box-sizing: border-box;
   padding: 20px;
 
+  @extend .pageBackground;
+  @include pageFadeIn(1s);
+
   &:hover {
     box-shadow: 0 0 10px rgba(#f44, 0.5);
-
   }
 
   @media screen and (min-height: 800px) {
@@ -40,7 +35,6 @@
   @media screen and (min-height: 1000px) {
     height: 800px;
   }
-
 }
 
 .title {
@@ -48,10 +42,10 @@
 }
 
 .controller {
-  text-align: right;
   padding: 20px 0;
-  display: block;
+  display: flex;
   box-sizing: border-box;
+  justify-content: space-between;
 }
 
 .dragArea {
@@ -114,4 +108,19 @@
 
 .subController {
   text-align: right;
+}
+
+.static {
+  @extend .large_text;
+  font-size: 18px;
+  line-height: 20px;
+  padding-left: 20px;
+}
+
+.staticText {
+  @extend .normal_text;
+  font-size: 18px;
+  line-height: 20px;
+  font-weight: 600;
+  margin-left: 10px;
 }

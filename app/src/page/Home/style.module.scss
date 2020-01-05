@@ -10,27 +10,85 @@
 }
 
 .show {
- animation: fadeIn 2s ease-out;
- animation-fill-mode: backwards; 
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(500px);
-  }
-  
-  75% {
-    opacity: 0.2;
-    // transform: translateY(100px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  @include pageFadeIn(2s);
+  @extend .pageWidth;
+  margin: 0 auto;
 }
 
 .controller {
   text-align: center;
+  margin-bottom: 20px;
+}
+
+.contentList {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.left {
+  width: 300px;
+}
+
+.todoList {
+  box-sizing: border-box;
+  padding: 20px;
+  box-sizing: border-box;
+  @extend .blockBorder;
+  @extend .pageBackground;
+}
+
+.itemTitle {
+  @extend .subtitle;
+}
+
+
+.blogList {
+  flex: 1;
+  padding: 20px;
+  box-sizing: border-box;
+  margin-left: 10px;
+  min-height: 600px;
+  @extend .blockBorder;
+  @extend .pageBackground
+}
+
+.errorEvent {
+  @extend .note_text;
+  color: red;
+}
+
+.warning {
+  @extend .note_text;
+  color: #fe9801;
+
+}
+
+.cardTitle {
+  color: #3e206d;
+  font-weight: blod;
+  position: relative;
+  left: -10px;
+}
+
+.itemBrief {
+  position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.panelControl {
+  margin-top: 10px;
+  text-align: right;
+  color: #333;
+
+  & > span {
+    cursor: pointer;
+
+    &:hover {
+      color: #bbb;
+    }
+  }
 }

@@ -1,0 +1,29 @@
+@import '../../static/style/mixins.scss';
+
+.tags {
+  margin-right: 10px;
+}
+
+.tagList {
+  display: flex;
+}
+
+.historyTags {
+  margin-top: 10px;
+}
+
+.tagsPanel {
+  width: 400px;
+  max-height: 150px;
+  overflow: auto;
+  background: #f1f1f6;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.group {
+  width: 100%;
+  & > label {
+    width: calc(50% - 15px);
+  }
+}

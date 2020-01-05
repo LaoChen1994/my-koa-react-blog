@@ -13,6 +13,54 @@
   src: url('../font/bellada\ personal\ license.ttf');
 }
 
+@mixin pageFadeIn($seconds) {
+  animation: fadeIn $seconds ease-out;
+  animation-fill-mode: backwards;
+}
+
+@mixin blockShadow($color) {
+  box-shadow: 0 0 5px rgba($color, 0.5);
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(500px);
+  }
+
+  75% {
+    opacity: 0.2;
+    // transform: translateY(100px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pageWidth {
+  width: 1000px;
+
+  @media screen and (min-width: 1300px) {
+    width: 1100px;
+  }
+
+  @media screen and (min-width: 1600px) {
+    width: 1300px;
+  }
+  margin: 0 auto;
+}
+
+.blockBorder {
+  @include blockShadow(#916dd5);
+  border-radius: 8px;
+}
+
+.pageBackground {
+  background: #fff;
+}
+
 .mainTitle {
   font-size: 32px;
   line-height: 40px;
@@ -42,5 +90,9 @@
   color: #fa163f;
   font-size: 14px;
   line-height: 20px;
-  font-weight: 400;
+  font-weight: 600;
+  border-left: 2px solid #f44;
+  padding-left: 20px;
+  border-radius: 2px;
+  margin-bottom: 8px;
 }

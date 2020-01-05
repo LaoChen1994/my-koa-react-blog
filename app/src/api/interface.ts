@@ -1,4 +1,5 @@
-import { IUserState } from '../interface';
+import { IUserState, IBlogTag } from '../interface';
+import { TNewTags } from '../component/TagsSelection/CloseTags';
 
 export interface ICommonApiInterface<T> {
   data: T;
@@ -9,6 +10,20 @@ export interface IStatus {
   status: boolean;
   msg: string;
   token: string;
+}
+
+export interface IData<T> {
+  data: T;
+}
+
+export interface IBlogInfo {
+  blogId: number;
+  blogName: string;
+  publishDate: Date;
+  lastUpdateTime: Date;
+  blogContent: string;
+  authorId: number;
+  tagsId: number[];
 }
 
 export type TUserLogin = (
@@ -27,6 +42,12 @@ export interface ITodoInfo {
   todoTitle: string;
   todoId: number;
   isExpire: boolean;
+}
+
+export interface IBlogContent {
+  title: string;
+  tags: TNewTags[];
+  content: string;
 }
 
 export type TAddTodoProps = Omit<ITodoInfo, 'todoId' | 'isExpire'>;
@@ -72,3 +93,26 @@ export type TFinishItem = (
 export type TClearAll = (
   todoIds: number[]
 ) => Promise<ICommonApiInterface<IStatus>>;
+
+export type TGetUndoList = (
+  userId: number
+) => Promise<ICommonApiInterface<IStatus & IData<{ undoList: ITodoInfo[] }>>>;
+
+export type TGetBlogList = (
+  pageSize: number,
+  currentPage: number
+) => Promise<ICommonApiInterface<IStatus & IData<{ blogList: IBlogInfo[] }>>>;
+
+export type TGetCompleteList = (
+  userId: number,
+  type: boolean
+) => Promise<ICommonApiInterface<IStatus & { data: ITodoInfo[] }>>;
+
+export type TGetUserTags = (
+  userId: number
+) => Promise<ICommonApiInterface<Omit<IStatus, 'token'> & IData<IBlogTag[]>>>;
+
+export type TAddBlog = (
+  userId: number,
+  blogContent: IBlogContent
+) => Promise<ICommonApiInterface<Omit<IStatus, 'token'>>>;

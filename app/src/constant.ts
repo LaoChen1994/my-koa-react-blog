@@ -1,4 +1,4 @@
-import { IUserLink, ILinkMap, IUserState } from './interface';
+import { IUserLink, ILinkMap, IUserState, IBlogTag } from './interface';
 
 export const ApiHost = 'http://127.0.0.1:8000/api';
 
@@ -21,7 +21,7 @@ const linkList: ILinkMap = {
   },
   blog: {
     title: '我的博客',
-    link: '/myBlog'
+    link: '/blog'
   },
   logout: {
     title: '登出',
@@ -60,4 +60,11 @@ export class LinkCreator extends LinkInfo {
     }
     return this;
   }
+}
+
+export const initTags: IBlogTag = {
+  tagId: -1,
+  tagName: "",
+  userId: -1,
+  articalNumber: 0
 }

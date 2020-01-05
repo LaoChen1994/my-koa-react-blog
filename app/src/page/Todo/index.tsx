@@ -10,7 +10,13 @@ import { AddTodoForm } from './AddTodoForm';
 import { CardContent } from './CardContent';
 
 import { UserContext } from '../../store/users';
-import { getTodoList, finishItem, recallItem, clearAll } from '../../api/todo';
+import {
+  getTodoList,
+  finishItem,
+  recallItem,
+  clearAll,
+  getCompleteList
+} from '../../api/todo';
 import { ITodoInfo } from '../../api/interface';
 import { MyCard, ICardProps, TCardSlidUp } from '../../component/MyCard';
 
@@ -24,6 +30,8 @@ export const TodoList: React.FC<Props> = () => {
   const [solvedList, setSolved] = useState<ITodoInfo[]>([]);
   const [unsolvedList, setUnsolved] = useState<ITodoInfo[]>([]);
   const [dropItemId, setDropItemId] = useState<number>(-1);
+
+  const [isHistory, setIsHis] = useState<boolean>(false);
 
   const openAddDialog = useCallback(() => {
     const { openDialog, closeDialog } = Dialog;
@@ -57,8 +65,6 @@ export const TodoList: React.FC<Props> = () => {
 
         const solvedList = todoList.filter(elem => elem.isComplete);
         const unsolvedList = todoList.filter(elem => !elem.isComplete);
-
-        console.log(unsolvedList, solvedList);
 
         setUnsolved(unsolvedList);
         setSolved(solvedList);
@@ -114,7 +120,7 @@ export const TodoList: React.FC<Props> = () => {
     const { data } = setStatus
       ? await finishItem(dropItemId)
       : await recallItem(dropItemId);
-    if (data.status) {
+    if (data && data.status) {
       Notify.success(`${data.msg}，请刷新查看任务状态`);
       window.location.reload();
     } else {
@@ -130,6 +136,14 @@ export const TodoList: React.FC<Props> = () => {
       setUnsolved([]);
     }
   };
+
+  const alterEvent = useCallback(async () => {
+    const { data } = await getCompleteList(state.userId, isHistory);
+    const { data: completeList } = data;
+
+    setSolved(completeList);
+    setIsHis(!isHistory);
+  }, [isHistory, state]);
 
   return (
     <div className={styles.wrapper}>
@@ -217,6 +231,17 @@ export const TodoList: React.FC<Props> = () => {
               </DragElement>
             ))}
           </DragWrapper>
+
+          <div className={styles.controller}>
+            <div>
+              <span className={styles.static}>总计:</span>
+              <span className={styles.staticText}>{solvedList.length}</span>
+            </div>
+
+            <Button type="primary" outline size="medium" onClick={alterEvent}>
+              {!isHistory ? '今日完成列表' : '历史完成列表'}
+            </Button>
+          </div>
         </div>
       </DragStore>
     </div>

@@ -26,6 +26,11 @@ const SqlHandler = function() {
       let _sql = 'SELECT ? FROM ?? WHERE ?';
       const data = await query(_sql, [keys, table, conditionObj]);
       return data;
+    },
+    async queryCount(table, keys, conditionObj) {
+      let _sql = 'SELECT COUNT(?) FROM ?? WHERE ?';
+      const data = await query(_sql, [keys, table, conditionObj]);
+      return data;
     }
   };
 };

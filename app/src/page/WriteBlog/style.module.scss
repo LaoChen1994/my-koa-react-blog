@@ -1,0 +1,56 @@
+@import '../../static/style/mixins.scss';
+
+.wrapper {
+  @extend .pageWidth;
+  @extend .blockBorder;
+  @extend .pageBackground;
+
+  margin-top: 20px;
+  padding: 20px 0;
+
+  @media screen and (min-height: 800px) {
+    height: 600px;
+  }
+  @media screen and (min-height: 900px) {
+    height: 700px;
+  }
+  @media screen and (min-height: 1000px) {
+    height: 800px;
+  }
+}
+
+.innerBlock {
+  width: 90%;
+  border: 2px solid #eee;
+  margin: 0 auto;
+}
+
+.blogHeader {
+  display: flex;
+}
+
+.titleHeader {
+  flex: 1;
+}
+
+.headerBtn {
+  flex: 0 200px;
+  padding-left: 20px;
+}
+
+.textEditor {
+  @extend .innerBlock;
+}
+
+.tagsController {
+  @extend .innerBlock;
+  padding: 20px 0;
+  margin-top: 10px;
+  box-sizing: border-box;
+}
+
+.controller {
+  @extend .innerBlock;
+  border: 0;
+  margin-top: 10px;
+}
