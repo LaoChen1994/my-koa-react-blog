@@ -1,12 +1,27 @@
-const { setCtxBody, genResp, to } = require('../utils');
+const { setCtxBody, genResp, to, timeFormat } = require('../utils');
 const { SqlHandler } = require('../model/utils/handleSql');
 const { query } = require('../model/utils/query');
+const iconv = require('iconv-lite');
+const uploadFile = require('../routes/utils/upload.js');
+const path = require('path');
 
 const getBlogTags = tagStr => tagStr.split(',').map(elem => +elem);
 const setBlogTags = tagList => tagList.join(',');
 
+const formatBlogContent = contentList =>
+  contentList.map(elem => {
+    elem.publishDate = timeFormat(elem.publishDate);
+    elem.lastUpdateTime = timeFormat(elem.lastUpdateTime);
+    elem.tagsId = getBlogTags(elem.tagsId);
+    return elem;
+  });
+
 const tagsIsExist = async (newTags, userId) =>
   new Promise(async (resolve, reject) => {
+    if (newTags.length === 0) {
+      resolve({ status: true, msg: '无新标签' });
+      return;
+    }
     const sql = `select * from KOA_BLOG_TAGS where userId=${userId} and tagName in (${newTags.map(
       elem => "'" + elem + "'"
     )})`;
@@ -47,19 +62,19 @@ module.exports = {
     const oldTagUpdateSql = `UPDATE KOA_BLOG_TAGS SET articalNumber = CASE tagId${oldTags
       .map(elem => ' WHEN ' + elem.tagId + ' THEN ' + (elem.articalNumber + 1))
       .join(' ')} END WHERE tagId in (${oldTags.map(x => x.tagId)})`;
+    const oldTagExec = oldTags.length ? query(oldTagUpdateSql) : {};
 
     const addNewTagsSql = `INSERT INTO KOA_BLOG_TAGS (tagName,userId) VALUES${newTags
-      .map(elem => '(\'' + elem.toString() + '\',' + userId + ')')
+      .map(elem => "('" + elem.toString() + "'," + userId + ')')
       .join(',')}`;
 
-    const oldTagExec = query(oldTagUpdateSql);
-    const newTagExec = query(addNewTagsSql);
+    const newTagExec = newTags.length ? query(addNewTagsSql) : {};
 
     const [err, data] = await to(Promise.all([oldTagExec, newTagExec]));
 
     if (!err) {
       const newTagRes = data[1];
-      const { affectedRows, insertId } = newTagRes;
+      const { affectedRows = 0, insertId } = newTagRes;
 
       const tagList = setBlogTags(
         [
@@ -83,5 +98,81 @@ module.exports = {
       console.log(err);
       ctx.body = genResp(false, '添加标签失败', []);
     }
+  },
+  async getBlogList(ctx) {
+    const { pageSize = 10, pageNumber = 0 } = ctx.query;
+
+    const sql = `select e.blogId,e.blogName,e.blogContent,e.publishDate,e.tagsId,d.userName,e.authorId,e.lastUpdateTime,d.avatarUrl from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId order by blogId desc limit ${pageNumber *
+      pageSize},${(pageNumber + 1) * pageSize}`;
+
+    let [err, data] = await to(query(sql));
+    let regx = /<.+?>/gi;
+
+    data = data.map(elem => {
+      elem.avatarUrl = iconv.decode(elem.avatarUrl, 'UTF-8');
+      elem.blogContent = elem.blogContent.replace(regx, '');
+      return elem;
+    });
+
+    console.log(data);
+
+    setCtxBody(
+      err,
+      { blogList: formatBlogContent(data) },
+      ctx,
+      '',
+      '获取博客列表失败'
+    );
+  },
+  async getBlogDetail(ctx) {
+    const { blogId } = ctx.query;
+    const sqlContent = `select c.blogId,c.blogName,c.lastUpdateTime,c.authorId,c.tagsId,c.publishDate,d.userName as username,c.blogContent,d.avatarUrl from KOA_BLOG_CONTENT c, KOA_BLOG_USER d where c.blogId=${blogId} and c.authorId=d.userId`;
+    const [contentErr, content] = await to(query(sqlContent));
+    if (contentErr) {
+      setCtxBody(contentErr, {}, ctx, '', '文章信息查询失败！');
+      return;
+    } else if (!content.length) {
+      setCtxBody(true, {}, ctx, '', '该文章不存在或者已被删除！');
+      return;
+    }
+    const tagsId = getBlogTags(content[0].tagsId);
+    const userId = content[0].authorId;
+    const sqlTags = `select * from KOA_BLOG_TAGS where tagId in (${tagsId})`;
+    const [tagsErr, tags] = await to(query(sqlTags));
+    const [numberErr, totalBlog] = await to(
+      query(
+        `select Count(*) as number from KOA_BLOG_CONTENT where authorId=${userId}`
+      )
+    );
+    content[0].lastUpdateTime = timeFormat(content[0].lastUpdateTime);
+    content[0].publishDate = timeFormat(content[0].publishDate);
+    content[0].avatarUrl = iconv.decode(content[0].avatarUrl, 'UTF-8');
+    if (numberErr) {
+      setCtxBody(true, {}, ctx, '', '拉取作者信息失败');
+      return;
+    }
+
+    setCtxBody(
+      tagsErr,
+      {
+        ...content[0],
+        tags,
+        blogNumber: totalBlog[0].number
+      },
+      ctx,
+      '查询成功',
+      '标签查询失败'
+    );
+  },
+  async blogMediaUpload(ctx) {
+    const [err, data] = await to(
+      uploadFile(ctx, path.resolve(__dirname, '../public/images/blogImage/'))
+    );
+    if(!err) {
+      const regx = /(\/image.*)/ig;
+      regx.exec(data.filePath);
+      data.filePath = RegExp.$1;
+    }
+    setCtxBody(err, data, ctx, 'success', 'error');
   }
 };

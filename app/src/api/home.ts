@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { ApiHost } from '../constant';
-import { TValidateUser, TGetTodoList, TGetBlogList, TGetUndoList } from './interface';
+import { TValidateUser, TGetUndoList } from './interface';
 
 const URL = `${ApiHost}/home`;
 
@@ -12,5 +12,3 @@ export const getUndoList: TGetUndoList = userId =>
     }
   });
 
-export const getBlogList: TGetBlogList = (pageSize, pageNumber) =>
-  axios.get(`${URL}/getNewBlogList`, { params: { pageSize, pageNumber } });

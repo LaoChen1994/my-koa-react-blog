@@ -437,12 +437,12 @@ const rootElement = document.getElementById('root');
 ReactDOM.render(<App />, rootElement);
 ```
 
-#### 10 . React 图片上传问题
+#### 10 . React 图片或者文件上传问题
 
 - 通过 base64 前端处理图片为 base64 的解决方案
   - 利用 FileReader 对数据进行读取，如果是图片会将图片读取为 base64 的形式
   - 将得到的 base64 的字符串传给后端
-  - 后端解析 base64 的字符串为图片即可
+  - 后端直接保存该html字符串，之后调用接口查询该数据直接前端通过img标签完成自动解析即可
 
 [参考博文](https://blog.csdn.net/dreamer2020/article/details/51794450)
 
@@ -461,7 +461,7 @@ function App() {
       console.log(result);
     };
 
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(file); // 得到经过base64编码的图片信息
   };
 
   return (
@@ -471,6 +471,103 @@ function App() {
   );
 }
 ```
+
++ 利用input,xhr,formData来实现
+  + 利用input[type='file']来实现
+  + 点击选择文件，且选择文件完毕后，触发onChange事件
+  + 通过event.targer.files(react中)获取所选文件
+  + 通过FormData这个类，将文件添加到其实例中
+  + 配置xhr，通过POST的方式发送formData到后端即可
+
+~~~javascript
+import React, { useState } from 'react';
+import { ApiHost } from '../../constant';
+import { Button, FormControl, Progress } from 'zent';
+
+export type UploadCompletCallback<T> = (
+  e: ProgressEvent<XMLHttpRequestEventTarget>,
+  reponse: T
+) => void;
+
+export type UploadStartCallback = (
+  e: ProgressEvent<XMLHttpRequestEventTarget>
+) => void;
+
+export type UploadProcessCallback = (loaded: number, total: number) => void;
+
+interface Props {
+  onComplete?: UploadCompletCallback<any>;
+  onStart?: UploadStartCallback;
+  onProcess?: UploadProcessCallback;
+  hasProcess?: boolean;
+  title: string;
+}
+
+export const UploadBtn: React.FC<Props> = props => {
+  const { onComplete, onStart, onProcess, hasProcess = false, title } = props;
+  const [progress, setProgress] = useState<number>(0);
+  const [uploadStatus, setStatus] = useState<boolean>(false);
+
+  // 处理文件上传的核心方法
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+
+    if (files) {
+      if (!files.length) return;
+
+      // 将文件处理成formData
+      let formData = new FormData();
+      for (let k in files) {
+        formData.append('file', files[k], window.encodeURI(files[k].name));
+      }
+
+      let xhr = new XMLHttpRequest();
+
+      xhr.responseType = 'json';
+      xhr.timeout = 5000;
+      xhr.open('POST', `${ApiHost}/user/upload`, true);
+
+      // 事件监听
+      xhr.addEventListener('loadstart', e => {
+        setProgress(0);
+        setStatus(true);
+        onStart && onStart(e);
+      });
+
+      xhr.upload.onprogress = function(e) {
+        const { total, loaded } = e;
+        setProgress((loaded / total) * 100);
+        onProcess && onProcess(loaded, total);
+      };
+
+      xhr.addEventListener('load', e => {
+        const result = xhr.response;
+        onComplete && onComplete(e, result);
+      });
+
+      xhr.send(formData);
+    } else {
+      return;
+    }
+  };
+
+  const selectFile = () => {
+    const btn = document.querySelector("input[type='file']");
+    //@ts-ignore
+    btn && btn.click();
+  };
+  return (
+    <FormControl label={title}>
+      <input type="file" onChange={handleChange} style={{ display: 'none' }} />
+      <Button onClick={selectFile}>上传</Button>
+      {hasProcess && uploadStatus && <Progress percent={progress}></Progress>}
+    </FormControl>
+  );
+};
+
+
+
+~~~
 
 #### 11. zent 封装表单组件
 
@@ -670,3 +767,30 @@ if (!err) {
   );
 }
 ```
+
+#### 12. 在react中使用防抖和节流
+
+##### 1. 原理
+
+为什么要使用防抖节流，以及防抖节流的原理可以细看
+
+[防抖和节流](https://blog.csdn.net/qq_24724109/article/details/100661976)
+
+#### 2. 在React中使用防抖节流错误的例子
+
+~~~javascript
+import React from "react";
+import { debounce } from "lodash";
+
+export function ErrorInput() {
+  const onChange = e => {
+    console.log(e.target.value);
+  };
+
+  return <input onChange={debounce(onChange, 500)} />;
+}
+~~~
+
+*上述代码看上去没啥问题，但是我们实际在输入框中改变Input的值的时候会出现以下报错*
+
+

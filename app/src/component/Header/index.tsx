@@ -5,7 +5,7 @@ import { Button, Popover } from 'zent';
 import { useHistory } from 'react-router-dom';
 import { IUserState } from '../../store/interface';
 
-import { LinkCreator } from '../../constant';
+import { LinkCreator, staticServer } from '../../constant';
 
 interface Props {
   userInfo?: IUserState;
@@ -76,7 +76,7 @@ export const Header: React.FC<Props> = props => {
           <Popover.Trigger.Hover>
             <img
               src={
-                `http://127.0.0.1:8000${avatarUrl}` ||
+                `${staticServer}${avatarUrl}` ||
                 require('../../static/image/user.jpeg')
               }
               alt="用户头像"
@@ -103,8 +103,8 @@ export const Header: React.FC<Props> = props => {
   }, [userInfo, dispatch]);
 
   const linkToHome = () => {
-    history.push('/home')
-  }
+    history.push('/home');
+  };
 
   return (
     <div className={styles.header}>

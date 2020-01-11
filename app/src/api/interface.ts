@@ -1,5 +1,6 @@
 import { IUserState, IBlogTag } from '../interface';
 import { TNewTags } from '../component/TagsSelection/CloseTags';
+import { string } from 'prop-types';
 
 export interface ICommonApiInterface<T> {
   data: T;
@@ -25,6 +26,11 @@ export interface IBlogInfo {
   authorId: number;
   tagsId: number[];
 }
+
+export type TBlogBrief = IBlogInfo & {
+  userName: IUserState['username'];
+  avatarUrl?: string;
+};
 
 export type TUserLogin = (
   username?: string,
@@ -52,6 +58,10 @@ export interface IBlogContent {
 
 export type TAddTodoProps = Omit<ITodoInfo, 'todoId' | 'isExpire'>;
 export type TAddModifyProps = Omit<ITodoInfo, 'userId' | 'isExpire'>;
+export type TBlogDetailInfo = IBlogInfo & {
+  tags: IBlogTag[];
+  blogNumber: number;
+} & Pick<IUserState, 'avatarUrl' | 'username'>;
 
 export type TUserRegister = (
   username: string,
@@ -101,7 +111,7 @@ export type TGetUndoList = (
 export type TGetBlogList = (
   pageSize: number,
   currentPage: number
-) => Promise<ICommonApiInterface<IStatus & IData<{ blogList: IBlogInfo[] }>>>;
+) => Promise<ICommonApiInterface<IStatus & IData<{ blogList: TBlogBrief[] }>>>;
 
 export type TGetCompleteList = (
   userId: number,
@@ -116,3 +126,15 @@ export type TAddBlog = (
   userId: number,
   blogContent: IBlogContent
 ) => Promise<ICommonApiInterface<Omit<IStatus, 'token'>>>;
+
+export type TGetBlogDetail = (
+  blogId: number
+) => Promise<ICommonApiInterface<IStatus & IData<TBlogDetailInfo>>>;
+
+
+export interface IUploadResponse {
+  fileName: string;
+  filePath: string;
+  msg: string;
+  status: boolean;
+}

@@ -14,6 +14,7 @@ import { UploadBtn, UploadCompletCallback } from '../../component/Upload';
 import styles from './style.module.scss';
 import { IValidator } from 'formulr';
 import { TLoadFileRes } from '../../api/interface';
+import { ApiHost } from '../../constant';
 
 interface Props {}
 
@@ -155,6 +156,7 @@ export const Register: React.FC<Props> = () => {
           title="上传头像"
           hasProcess={true}
           onComplete={handleUpload}
+          uploadPath={`${ApiHost}/user/upload`}
         ></UploadBtn>
 
         <div className={styles.controller}>
