@@ -1,0 +1,40 @@
+@import '../../static/style/mixins.scss';
+
+.wrapper {
+  @include blockShadow(#333);
+  width: 90%;
+  margin: 10px auto;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.title {
+  @extend .large_text;
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.brief {
+  @extend .normal_text;
+  font-size: 16px;
+  margin-bottom: 5px;
+  @include setEllipse(2);
+  text-indent: 28px;
+}
+
+.bottom {
+  @extend .note_text;
+  font-size: 14px;
+  & > span {
+    margin-right: 10px;
+  }
+  display: flex;
+  align-items: center;
+}

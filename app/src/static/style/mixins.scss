@@ -13,6 +13,19 @@
   src: url('../font/bellada\ personal\ license.ttf');
 }
 
+@mixin setEllipse($lineNumber) {
+  @if ($lineNumber > 1) {
+    position: relative;
+    display: -webkit-box;
+    -webkit-line-clamp: $lineNumber;
+    -webkit-box-orient: vertical;
+  } @else {
+    white-space: nowrap;
+  }
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
 @mixin pageFadeIn($seconds) {
   animation: fadeIn $seconds ease-out;
   animation-fill-mode: backwards;
@@ -39,6 +52,12 @@
   }
 }
 
+@mixin splitLine($position: top, $color: #d89cf6) {
+  padding-#{$position}: 10px;
+  margin-#{$position}: 10px;
+  border-#{$position}: 1px dashed $color;
+}
+
 .pageWidth {
   width: 1000px;
 
@@ -50,6 +69,7 @@
     width: 1300px;
   }
   margin: 0 auto;
+  min-height: 100%;
 }
 
 .blockBorder {

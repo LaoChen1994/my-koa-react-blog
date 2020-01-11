@@ -48,8 +48,9 @@
   box-sizing: border-box;
   margin-left: 10px;
   min-height: 600px;
+  overflow-x: hidden;
   @extend .blockBorder;
-  @extend .pageBackground
+  @extend .pageBackground;
 }
 
 .errorEvent {

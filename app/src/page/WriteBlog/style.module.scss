@@ -4,8 +4,7 @@
   @extend .pageWidth;
   @extend .blockBorder;
   @extend .pageBackground;
-
-  margin-top: 20px;
+  @include pageFadeIn(1s);
   padding: 20px 0;
 
   @media screen and (min-height: 800px) {

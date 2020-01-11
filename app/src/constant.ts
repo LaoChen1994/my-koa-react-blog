@@ -1,6 +1,7 @@
 import { IUserLink, ILinkMap, IUserState, IBlogTag } from './interface';
 
 export const ApiHost = 'http://127.0.0.1:8000/api';
+export const staticServer = 'http://127.0.0.1:8000'
 
 export const initUserInfo: IUserState = {
   username: '',
@@ -21,7 +22,7 @@ const linkList: ILinkMap = {
   },
   blog: {
     title: '我的博客',
-    link: '/blog'
+    link: '/blog/'
   },
   logout: {
     title: '登出',

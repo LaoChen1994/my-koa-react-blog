@@ -2,7 +2,7 @@ const userValidate = require('../model/utils/validateUser.js');
 const jwt = require('jsonwebtoken');
 const { to, setCtxBody } = require('../utils');
 const { query } = require('../model/utils/query');
-const moment = require('moment')
+const moment = require('moment');
 const iconv = require('iconv-lite');
 
 module.exports = {
@@ -24,8 +24,8 @@ module.exports = {
   async getBlogList(ctx) {
     const { pageSize = 10, pageNumber = 0 } = ctx.query;
 
-    const sql = `select * from KOA_BLOG_CONTENT order by blogId limit ${pageNumber *
-      pageSize}, ${pageNumber * (pageSize + 1)}`;
+    const sql = `select * from KOA_BLOG_CONTENT order by blogId desc limit ${pageNumber *
+      pageSize},${(pageNumber + 1) * pageSize}`;
     const [err, data] = await to(query(sql));
 
     setCtxBody(err, { blogList: data }, ctx, '', '获取博客列表失败');
@@ -38,8 +38,12 @@ module.exports = {
     if (!err) {
       data = data.map(elem => {
         elem.todoItem = iconv.decode(elem.todoItem, 'UTF-8');
-        elem.startTime = moment(new Date(elem.startTime)).format('YYYY-MM-DD HH:mm:ss');
-        elem.endTime = moment(new Date(elem.endTime)).format('YYYY-MM-DD HH:mm:ss');
+        elem.startTime = moment(new Date(elem.startTime)).format(
+          'YYYY-MM-DD HH:mm:ss'
+        );
+        elem.endTime = moment(new Date(elem.endTime)).format(
+          'YYYY-MM-DD HH:mm:ss'
+        );
 
         return elem;
       });

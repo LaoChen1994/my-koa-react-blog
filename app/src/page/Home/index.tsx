@@ -1,11 +1,14 @@
 import React, { useEffect, useContext, useState, useCallback } from 'react';
-import { getHome, getBlogList, getUndoList } from '../../api/home';
+import { getHome, getUndoList } from '../../api/home';
+import { getBlogList } from '../../api/blog';
 import { UserContext } from '../../store/users';
 import Welcome from './Welcome';
 import style from './style.module.scss';
 import { useHistory } from 'react-router-dom';
 import { Button, Collapse, Icon } from 'zent';
-import { IBlogInfo, ITodoInfo } from '../../api/interface';
+import { TBlogBrief, ITodoInfo } from '../../api/interface';
+import { BlogCard } from '../../component/BlogCard';
+import { MyWaterfall, IWaterfallProps } from '../../component/MyWaterFall';
 
 interface Props {}
 
@@ -13,42 +16,35 @@ const Home: React.FC<Props> = () => {
   const history = useHistory();
 
   const { state } = useContext(UserContext);
-
-  const [curPage, setCurPage] = useState<number>(0);
-  const [blogList, setBlogList] = useState<IBlogInfo[]>([]);
+  const [blogList, setBlogList] = useState<TBlogBrief[]>([]);
   const [undoList, setUndoList] = useState<ITodoInfo[]>([]);
 
   const [active, setActive] = useState<string | string[]>('map-0');
-  const pageSize = 10;
+  const pageSize = 5;
 
   useEffect(() => {
     async function getData() {
       await getHome();
     }
 
+    async function _getBlogList() {
+      const { data } = await getBlogList(pageSize, 0);
+      const { blogList } = data.data;
+      setBlogList(blogList);
+    }
+
     try {
       getData();
+      _getBlogList();
     } catch (error) {
       console.log('err=', error);
     }
   }, []);
 
   useEffect(() => {
-    async function _getBlogList() {
-      const { data } = await getBlogList(pageSize, curPage);
-      const { blogList } = data.data;
-
-      setBlogList(blogList);
-    }
-
-    _getBlogList();
-  }, [curPage]);
-
-  useEffect(() => {
     async function _getUndoList() {
       const { data } = await getUndoList(state.userId);
       const { undoList } = data.data;
-      console.log(data);
       setUndoList(undoList);
     }
 
@@ -63,10 +59,17 @@ const Home: React.FC<Props> = () => {
     history.push('/blog');
   };
 
+  const linkToWrite = () => {
+    history.push('/blog/blogEdit');
+  };
+
   const handleColChange = (value: string | string[]) => {
     setActive(value);
   };
 
+  /**
+   * 留作扩展用
+   */
   const handlePanelChange = (key: string, isActive: boolean) => {
     console.log(key, isActive);
   };
@@ -117,6 +120,24 @@ const Home: React.FC<Props> = () => {
     );
   }, [undoList, active]);
 
+  const handleScrolLoading: IWaterfallProps['handleLoading'] = useCallback(
+    async (page, resolve, reject) => {
+      if (resolve) {
+        const { data } = await getBlogList(pageSize, page);
+        const { data: _data } = data;
+        const { blogList: _bl } = _data;
+
+        if (_bl && _bl.length) {
+          resolve(true);
+          setBlogList([...blogList, ..._bl]);
+        } else {
+          reject && reject('已经到底啦～');
+        }
+      }
+    },
+    [blogList, getBlogList]
+  );
+
   return (
     <div className={style.show}>
       <div className={style.banner}>
@@ -130,15 +151,34 @@ const Home: React.FC<Props> = () => {
           type="success"
           outline
           size="large"
-          style={{ marginLeft: '30px' }}
+          style={{ marginLeft: '30px', width: '120px' }}
           onClick={linkToBlog}
         >
           我的博客
         </Button>
+        <Button
+          type="warning"
+          onClick={linkToWrite}
+          size="large"
+          outline
+          style={{ marginLeft: '30px', width: '120px' }}
+        >
+          写博客
+        </Button>
       </div>
 
       <div className={style.contentList}>
-        <div className={style.blogList}></div>
+        <MyWaterfall
+          handleLoading={handleScrolLoading}
+          className={style.blogList}
+        >
+          <div className={style.itemTitle}>最新博客</div>
+          <div className={style.blogBody}>
+            {blogList.map((elem, index) => (
+              <BlogCard data={elem}></BlogCard>
+            ))}
+          </div>
+        </MyWaterfall>
         <div className={style.left}>
           <div className={style.todoList}>
             <div className={style.itemTitle}>代办事项</div>

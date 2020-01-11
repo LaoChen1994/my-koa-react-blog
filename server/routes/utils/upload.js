@@ -14,13 +14,13 @@ const uploadFile = async (ctx, filePath) => {
 
   return new Promise((resolve, reject) => {
     try {
-      if (isImage(extname.substr(1))) {
+      // if (isImage(extname.substr(1))) {
         const reader = fs.createReadStream(file.path);
         const writer = fs.createWriteStream(fileLocation);
 
         reader.pipe(writer);
-      } else {
-      }
+      // } else {
+      // }
 
       resolve({
         status: true,

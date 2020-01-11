@@ -1,0 +1,62 @@
+@import '../../static/style/mixins.scss';
+
+.wrapper {
+  @extend .pageWidth;
+  @extend .blockBorder;
+  padding: 20px;
+  background: #fff;
+  margin-bottom: 50px;
+}
+
+.header {
+  margin-bottom: 10px;
+
+  & > h1 {
+    @extend .large_text;
+    font-weight: 600;
+  }
+}
+
+.authorInfo {
+  @extend .note_text;
+  display: flex;
+  align-items: center;
+}
+
+.userIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.right {
+  margin-left: 10px;
+}
+
+.username {
+  line-height: 1.2;
+  @extend .normal_text;
+  font-size: 20px;
+}
+
+.text {
+  @extend .normal_text;
+  line-height: 1.2;
+
+  p {
+    line-height: 20px;
+  }
+
+  img {
+    margin: 10px auto;
+    width: 80%;
+  }
+}
+
+.bottomSplit {
+  @include splitLine(bottom);
+}
+
+.topSplit {
+  @include splitLine(top);
+}

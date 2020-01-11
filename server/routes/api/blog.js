@@ -4,6 +4,8 @@ const router = new Router();
 
 router.get('/getUserTags', BlogController.getUserTags);
 router.post('/addBlog', BlogController.addBlog);
+router.get('/getBlogList', BlogController.getBlogList);
+router.get('/getBlogDetail', BlogController.getBlogDetail);
+router.post('/blogImageUpload', BlogController.blogMediaUpload)
 
-
-module.exports = router
+module.exports = router;

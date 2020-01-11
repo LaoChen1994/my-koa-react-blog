@@ -1,0 +1,12 @@
+@import "../../static/style/mixins.scss";
+.wrapper {
+  height: 100%;
+}
+
+
+.bottomTips {
+  text-align: center;
+  padding: 5px 0;
+  @extend .note_text;
+  color: #666;
+}

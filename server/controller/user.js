@@ -98,5 +98,5 @@ module.exports = UserController = {
     } else {
       ctx.body = genResp(true, '用户名可用', {});
     }
-  }
+  },
 };

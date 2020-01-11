@@ -19,10 +19,11 @@ interface Props {
   onProcess?: UploadProcessCallback;
   hasProcess?: boolean;
   title: string;
+  uploadPath: string;
 }
 
 export const UploadBtn: React.FC<Props> = props => {
-  const { onComplete, onStart, onProcess, hasProcess = false, title } = props;
+  const { onComplete, onStart, onProcess, hasProcess = false, title, uploadPath } = props;
   const [progress, setProgress] = useState<number>(0);
   const [uploadStatus, setStatus] = useState<boolean>(false);
 
@@ -42,7 +43,7 @@ export const UploadBtn: React.FC<Props> = props => {
 
       xhr.responseType = 'json';
       xhr.timeout = 5000;
-      xhr.open('POST', `${ApiHost}/user/upload`, true);
+      xhr.open('POST', uploadPath, true);
 
       // 事件监听
       xhr.addEventListener('loadstart', e => {
