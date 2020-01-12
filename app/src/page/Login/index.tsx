@@ -46,9 +46,7 @@ const Login: React.FC<{}> = () => {
   useEffect(() => {
     const token = window.localStorage.getItem('userToken');
     if (token) {
-      if (state && state.isLogin) {
-        history.push('/home');
-      }
+      history.push('/home');
     } else {
       dispatch({ type: 'logout' });
     }

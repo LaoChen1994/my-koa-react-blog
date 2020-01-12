@@ -30,6 +30,10 @@ const linkList: ILinkMap = {
       localStorage.removeItem('userToken');
       window.location.hash = '/login';
     }
+  },
+  fileCenter: {
+    title: '文件中心',
+    link: '/fileCenter'
   }
 };
 

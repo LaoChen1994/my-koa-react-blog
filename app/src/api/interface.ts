@@ -110,7 +110,8 @@ export type TGetUndoList = (
 
 export type TGetBlogList = (
   pageSize: number,
-  currentPage: number
+  currentPage: number,
+  userId?: number
 ) => Promise<ICommonApiInterface<IStatus & IData<{ blogList: TBlogBrief[] }>>>;
 
 export type TGetCompleteList = (

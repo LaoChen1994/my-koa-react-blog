@@ -100,10 +100,12 @@ module.exports = {
     }
   },
   async getBlogList(ctx) {
-    const { pageSize = 10, pageNumber = 0 } = ctx.query;
+    const { pageSize = 10, pageNumber = 0, userId } = ctx.query;
 
-    const sql = `select e.blogId,e.blogName,e.blogContent,e.publishDate,e.tagsId,d.userName,e.authorId,e.lastUpdateTime,d.avatarUrl from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId order by blogId desc limit ${pageNumber *
-      pageSize},${(pageNumber + 1) * pageSize}`;
+    const sql = `select e.blogId,e.blogName,e.blogContent,e.publishDate,e.tagsId,d.userName,e.authorId,e.lastUpdateTime,d.avatarUrl from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId ${
+      userId ? 'userId=' + userId : ''
+    } order by blogId desc limit ${pageNumber * pageSize},${(pageNumber + 1) *
+      pageSize}`;
 
     let [err, data] = await to(query(sql));
     let regx = /<.+?>/gi;
@@ -168,8 +170,8 @@ module.exports = {
     const [err, data] = await to(
       uploadFile(ctx, path.resolve(__dirname, '../public/images/blogImage/'))
     );
-    if(!err) {
-      const regx = /(\/image.*)/ig;
+    if (!err) {
+      const regx = /(\/image.*)/gi;
       regx.exec(data.filePath);
       data.filePath = RegExp.$1;
     }

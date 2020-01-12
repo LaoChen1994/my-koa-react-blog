@@ -51,8 +51,9 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
     const { offsetHeight } = current as HTMLDivElement;
     const { innerHeight, pageYOffset } = window;
 
-    setLastHeight(pageYOffset);
+    console.log(pageYOffset, lastPageOffset)
     const isDown = pageYOffset - lastPageOffset > 0;
+    setLastHeight(pageYOffset);
 
     if (scrollTop + innerHeight >= offsetHeight && isDown) {
       new Promise<boolean>((resolve, reject) => {
@@ -74,7 +75,6 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
   };
 
   const debounced = debounce(_handleScroll, 500);
-  // 内部scroll
   const handleScroll = useCallback(
     (event: Event) => {
       const height = document.documentElement.scrollTop;
