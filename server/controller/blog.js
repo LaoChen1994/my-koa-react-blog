@@ -103,9 +103,12 @@ module.exports = {
     const { pageSize = 10, pageNumber = 0, userId } = ctx.query;
 
     const sql = `select e.blogId,e.blogName,e.blogContent,e.publishDate,e.tagsId,d.userName,e.authorId,e.lastUpdateTime,d.avatarUrl from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId ${
-      userId ? 'userId=' + userId : ''
+      userId ? 'and userId=' + userId : ''
     } order by blogId desc limit ${pageNumber * pageSize},${(pageNumber + 1) *
       pageSize}`;
+
+    const countSql = `select Count(*) as totalNumber from KOA_BLOG_CONTENT where authorId=${userId ? userId : -1}`;
+    let [_, count] = await to(query(countSql));
 
     let [err, data] = await to(query(sql));
     let regx = /<.+?>/gi;
@@ -116,11 +119,12 @@ module.exports = {
       return elem;
     });
 
-    console.log(data);
+    console.log('blogList=', data);
+    console.log(count)
 
     setCtxBody(
       err,
-      { blogList: formatBlogContent(data) },
+      { blogList: formatBlogContent(data), totalNumber: count[0].totalNumber },
       ctx,
       '',
       '获取博客列表失败'

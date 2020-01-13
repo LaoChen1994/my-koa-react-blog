@@ -14,7 +14,7 @@ import { useHistory } from 'react-router-dom';
 import { userLogin } from '../../api/user';
 
 const Login: React.FC<{}> = () => {
-  const { state, dispatch } = useContext(UserContext);
+  const { dispatch } = useContext(UserContext);
   const form = Form.useForm(FormStrategy.View);
   const history = useHistory();
 

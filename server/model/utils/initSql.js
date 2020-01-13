@@ -3,4 +3,4 @@ const path = require('path');
 
 const handler = SqlHandler()
 
-handler.execSqlFile(path.resolve(__dirname, '../sql/initTagsBlog.sql'));
+handler.execSqlFile(path.resolve(__dirname, '../sql/initFileCenter.sql'));

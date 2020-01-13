@@ -29,8 +29,10 @@ const Home: React.FC<Props> = () => {
 
     async function _getBlogList() {
       const { data } = await getBlogList(pageSize, 0);
-      const { blogList } = data.data;
-      setBlogList(blogList);
+      if (data) {
+        const { blogList } = data.data;
+        setBlogList(blogList);
+      }
     }
 
     try {
@@ -118,7 +120,7 @@ const Home: React.FC<Props> = () => {
         </div>
       </div>
     );
-  }, [undoList, active]);
+  }, [undoList, active, linkTodoList]);
 
   const handleScrolLoading: IWaterfallProps['handleLoading'] = useCallback(
     async (page, resolve, reject) => {
@@ -135,7 +137,7 @@ const Home: React.FC<Props> = () => {
         }
       }
     },
-    [blogList, getBlogList]
+    [blogList]
   );
 
   return (
@@ -175,7 +177,7 @@ const Home: React.FC<Props> = () => {
           <div className={style.itemTitle}>最新博客</div>
           <div className={style.blogBody}>
             {blogList.map((elem, index) => (
-              <BlogCard data={elem}></BlogCard>
+              <BlogCard data={elem} key={`blog-card-${index}`}></BlogCard>
             ))}
           </div>
         </MyWaterfall>

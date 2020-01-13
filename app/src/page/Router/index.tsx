@@ -19,6 +19,8 @@ import { getHome } from '../../api/home';
 import { initUserInfo } from '../../constant';
 import { IUserState } from '../../interface';
 import { FileCenter } from '../FileCenter';
+import { SwitchHeader } from '../../store/SwitchHeader';
+
 
 const RouterPage: React.FC = () => {
   // !window._global &&

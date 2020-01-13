@@ -27,10 +27,26 @@ export interface IBlogInfo {
   tagsId: number[];
 }
 
+export interface IUserDetail {
+  userId: number;
+  Email: string;
+  avatarUrl: string;
+  blogNumber: number;
+  userName: string;
+}
+
+export interface IBlogListStatic {
+  totalNumber: number;
+}
+
 export type TBlogBrief = IBlogInfo & {
   userName: IUserState['username'];
   avatarUrl?: string;
 };
+
+export type TGetUserDetail = (
+  userId: number
+) => Promise<ICommonApiInterface<IStatus & IData<IUserDetail>>>;
 
 export type TUserLogin = (
   username?: string,
@@ -112,7 +128,11 @@ export type TGetBlogList = (
   pageSize: number,
   currentPage: number,
   userId?: number
-) => Promise<ICommonApiInterface<IStatus & IData<{ blogList: TBlogBrief[] }>>>;
+) => Promise<
+  ICommonApiInterface<
+    IStatus & IData<{ blogList: TBlogBrief[]; totalNumber: number }>
+  >
+>;
 
 export type TGetCompleteList = (
   userId: number,
@@ -131,7 +151,6 @@ export type TAddBlog = (
 export type TGetBlogDetail = (
   blogId: number
 ) => Promise<ICommonApiInterface<IStatus & IData<TBlogDetailInfo>>>;
-
 
 export interface IUploadResponse {
   fileName: string;

@@ -49,7 +49,7 @@ app.use(
   koaBody({
     multipart: true,
     formidable: {
-      maxFileSize: 1024 * 1024 * 10
+      maxFileSize: 1024 * 1024 * 100
     },
     patchKoa: true
   })

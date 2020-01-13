@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { isImage } = require('../../utils');
 
 const uploadFile = async (ctx, filePath) => {
   const file = ctx.request.files.file;
@@ -14,13 +13,10 @@ const uploadFile = async (ctx, filePath) => {
 
   return new Promise((resolve, reject) => {
     try {
-      // if (isImage(extname.substr(1))) {
         const reader = fs.createReadStream(file.path);
         const writer = fs.createWriteStream(fileLocation);
 
         reader.pipe(writer);
-      // } else {
-      // }
 
       resolve({
         status: true,

@@ -116,7 +116,7 @@ export const CloseTags: React.FC<Props> = props => {
 
   useEffect(() => {
     updateTagList(_tagList);
-  }, [_tagList]);
+  }, [_tagList, updateTagList]);
 
   return (
     <>
