@@ -152,6 +152,11 @@ export const FileCenter: React.FC<Props> = () => {
               }}
             ></FileCard>
           ))}
+          {
+            !fileList.length && (
+              <div className={styles.emptyList}>文件列表为空~</div>
+            )
+          }
         </MyWaterfall>
       </div>
     </div>
