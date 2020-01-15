@@ -14,7 +14,7 @@ import { useHistory } from 'react-router-dom';
 import { userLogin } from '../../api/user';
 
 const Login: React.FC<{}> = () => {
-  const { state, dispatch } = useContext(UserContext);
+  const { dispatch } = useContext(UserContext);
   const form = Form.useForm(FormStrategy.View);
   const history = useHistory();
 
@@ -46,9 +46,7 @@ const Login: React.FC<{}> = () => {
   useEffect(() => {
     const token = window.localStorage.getItem('userToken');
     if (token) {
-      if (state && state.isLogin) {
-        history.push('/home');
-      }
+      history.push('/home');
     } else {
       dispatch({ type: 'logout' });
     }

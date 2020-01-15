@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useMemo, useCallback } from 'react';
+import React, { ReactElement } from 'react';
 import styles from './style.module.scss';
 import cx from 'classnames';
 

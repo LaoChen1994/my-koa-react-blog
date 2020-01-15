@@ -27,10 +27,26 @@ export interface IBlogInfo {
   tagsId: number[];
 }
 
+export interface IUserDetail {
+  userId: number;
+  Email: string;
+  avatarUrl: string;
+  blogNumber: number;
+  userName: string;
+}
+
+export interface IBlogListStatic {
+  totalNumber: number;
+}
+
 export type TBlogBrief = IBlogInfo & {
   userName: IUserState['username'];
   avatarUrl?: string;
 };
+
+export type TGetUserDetail = (
+  userId: number
+) => Promise<ICommonApiInterface<IStatus & IData<IUserDetail>>>;
 
 export type TUserLogin = (
   username?: string,
@@ -38,6 +54,8 @@ export type TUserLogin = (
 ) => Promise<
   ICommonApiInterface<IStatus & { userInfo: Omit<IUserState, 'isLogin'> }>
 >;
+
+export type TReturnData<T> = IStatus & IData<T>
 
 export interface ITodoInfo {
   userId: number;
@@ -56,12 +74,24 @@ export interface IBlogContent {
   content: string;
 }
 
+export interface IFileInfo {
+  fileName: string;
+  publishDate: string;
+  fileId: number;
+  fileBrief: string;
+  authoId: number;
+  location: string;
+  downloadNumber: number;
+}
+
 export type TAddTodoProps = Omit<ITodoInfo, 'todoId' | 'isExpire'>;
 export type TAddModifyProps = Omit<ITodoInfo, 'userId' | 'isExpire'>;
 export type TBlogDetailInfo = IBlogInfo & {
   tags: IBlogTag[];
   blogNumber: number;
 } & Pick<IUserState, 'avatarUrl' | 'username'>;
+export type TFileListParams = Omit<IFileInfo, 'authorId'> &
+  Pick<IUserState, 'userId' | 'username' | 'avatarUrl'>;
 
 export type TUserRegister = (
   username: string,
@@ -110,8 +140,13 @@ export type TGetUndoList = (
 
 export type TGetBlogList = (
   pageSize: number,
-  currentPage: number
-) => Promise<ICommonApiInterface<IStatus & IData<{ blogList: TBlogBrief[] }>>>;
+  currentPage: number,
+  userId?: number
+) => Promise<
+  ICommonApiInterface<
+    IStatus & IData<{ blogList: TBlogBrief[]; totalNumber: number }>
+  >
+>;
 
 export type TGetCompleteList = (
   userId: number,
@@ -131,10 +166,26 @@ export type TGetBlogDetail = (
   blogId: number
 ) => Promise<ICommonApiInterface<IStatus & IData<TBlogDetailInfo>>>;
 
-
 export interface IUploadResponse {
   fileName: string;
   filePath: string;
   msg: string;
   status: boolean;
 }
+
+export type TAddNewFile = (
+  filename: string,
+  fileBrief: string,
+  authorId: number,
+  location: string
+) => Promise<ICommonApiInterface<IStatus>>;
+
+export type TGetFileList = (
+  pageSize: number,
+  pageNumber: number,
+  userId?: number
+) => Promise<
+  ICommonApiInterface<Omit<IStatus, 'token'> & IData<TFileListParams[]>>
+>;
+
+export type TAddDownloadNum = (fileId: number) => Promise<ICommonApiInterface<TReturnData<{}>>>

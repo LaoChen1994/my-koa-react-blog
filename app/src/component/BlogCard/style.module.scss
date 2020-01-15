@@ -4,14 +4,34 @@
   @include blockShadow(#333);
   width: 90%;
   margin: 10px auto;
-  cursor: pointer;
   padding: 10px;
+  overflow: hidden;
+}
+
+.cursorPointer {
+  cursor: pointer;
 }
 
 .title {
   @extend .large_text;
   font-size: 18px;
   margin-bottom: 5px;
+  @include setEllipse(1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+}
+
+.titleText {
+  flex: 1;
+  overflow: hidden; 
+}
+
+.controller {
+  flex: 0 200px;
+  text-align: right;
+
 }
 
 .avatar {

@@ -31,7 +31,7 @@ export const Header: React.FC<Props> = props => {
 
   const renderHoverList = () => {
     const userLink = new LinkCreator('用户Link')
-      .addLinkPage(['userCenter', 'todoList', 'blog', 'logout'])
+      .addLinkPage(['userCenter', 'todoList', 'blog', 'fileCenter', 'logout'])
       .getLinkList();
 
     const handleClick = (param: string | (() => void) | null) => () => {

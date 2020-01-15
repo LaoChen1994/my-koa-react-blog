@@ -1,0 +1,27 @@
+@import '../../static/style/mixins.scss';
+
+.wrapper {
+  @extend .pageWidth;
+  @include pageFadeIn(1s);
+
+  margin-top: 30px;
+  display: flex;
+}
+
+.b1 {
+  flex: 0 300px;
+}
+
+.userInfo {
+  @extend .blockBorder;
+  @extend .pageBackground;
+}
+
+.b2 {
+  flex: 1;
+  overflow: hidden;
+  @extend .blockBorder;
+  @extend .pageBackground;
+  margin-left: 20px;
+}
+

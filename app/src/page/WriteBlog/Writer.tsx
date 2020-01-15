@@ -1,4 +1,4 @@
-import React, { useState, useRef, useImperativeHandle } from 'react';
+import React, { useState, useImperativeHandle } from 'react';
 import BraftEritor, { MediaType } from 'braft-editor';
 import { IWriterRefExpose } from './interface';
 import { ApiHost, staticServer } from '../../constant';

@@ -1,7 +1,7 @@
 import { IUserLink, ILinkMap, IUserState, IBlogTag } from './interface';
 
 export const ApiHost = 'http://127.0.0.1:8000/api';
-export const staticServer = 'http://127.0.0.1:8000'
+export const staticServer = 'http://127.0.0.1:8000';
 
 export const initUserInfo: IUserState = {
   username: '',
@@ -22,7 +22,7 @@ const linkList: ILinkMap = {
   },
   blog: {
     title: '我的博客',
-    link: '/blog/'
+    link: '/blog'
   },
   logout: {
     title: '登出',
@@ -30,6 +30,10 @@ const linkList: ILinkMap = {
       localStorage.removeItem('userToken');
       window.location.hash = '/login';
     }
+  },
+  fileCenter: {
+    title: '文件中心',
+    link: '/fileCenter'
   }
 };
 
@@ -63,9 +67,14 @@ export class LinkCreator extends LinkInfo {
   }
 }
 
+export const transMap: { [keys: string]: string } = {
+  Email: '电子邮件',
+  blogNumber: '博文数量'
+};
+
 export const initTags: IBlogTag = {
   tagId: -1,
-  tagName: "",
+  tagName: '',
   userId: -1,
   articalNumber: 0
-}
+};

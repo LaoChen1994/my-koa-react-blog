@@ -19,6 +19,7 @@ module.exports = {
       data = data || {};
       ctx.body = genResp(true, okMsg, data);
     } else {
+      console.log(error);
       errorMsg = errorMsg | '内部服务器错误';
       ctx.body = genResp(false, okMsg, {});
     }

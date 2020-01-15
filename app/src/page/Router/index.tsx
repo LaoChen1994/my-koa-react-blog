@@ -14,11 +14,13 @@ import { Register } from '../../page/Register';
 import { TodoList } from '../../page/Todo';
 import NotFound from '../NotFound';
 import { Blog } from '../Blog';
-import { WriteBlog } from '../WriteBlog';
 
 import { getHome } from '../../api/home';
 import { initUserInfo } from '../../constant';
 import { IUserState } from '../../interface';
+import { FileCenter } from '../FileCenter';
+import { SwitchHeader } from '../../store/SwitchHeader';
+
 
 const RouterPage: React.FC = () => {
   // !window._global &&
@@ -73,6 +75,9 @@ const RouterPage: React.FC = () => {
           </Route>
           <Route path="/blog">
             <Blog></Blog>
+          </Route>
+          <Route path="/fileCenter">
+            <FileCenter></FileCenter>
           </Route>
           <Route exact path="/404">
             <NotFound></NotFound>

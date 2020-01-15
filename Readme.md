@@ -722,7 +722,7 @@ const rootElement = document.getElementById('root');
 ReactDOM.render(<App />, rootElement);
 ```
 
-#### 11. nodejs mysql 库的几个使用问题解决
+#### 12. nodejs mysql 库的几个使用问题解决
 
 **1. 查询插入数据的信息**
 
@@ -768,7 +768,7 @@ if (!err) {
 }
 ```
 
-#### 12. 在react中使用防抖和节流
+#### 13. 在react中使用防抖和节流
 
 ##### 1. 原理
 
@@ -776,7 +776,7 @@ if (!err) {
 
 [防抖和节流](https://blog.csdn.net/qq_24724109/article/details/100661976)
 
-#### 2. 在React中使用防抖节流错误的例子
+##### 2. 在React中使用防抖节流错误的例子
 
 ~~~javascript
 import React from "react";
@@ -792,5 +792,360 @@ export function ErrorInput() {
 ~~~
 
 *上述代码看上去没啥问题，但是我们实际在输入框中改变Input的值的时候会出现以下报错*
+![](/home/cyx/Desktop/Learning/ReactBlog/img/选区_149.png)
 
+这里存在的问题是，因为event事件是同步的，而通过debounce之后，会将多次的事件合并为一次，进行执行，因此该event性质会被改变不再是同步传过来的变量了，因此会有该警告
+
+##### ３. 解决办法
+
+方法一：添加e.persist()。如果按照提示，在调用的函数中添加e.persist(),确实能够消除该报错，但是接下来的问题是event.target可能会是null，那么如果我们在接下来的业务代码中需要使用到e.target.value就会由问题。因此这个方法不太推荐。
+
+方法二：利用传参的方法来实现。直接上代码
+
+```javascript
+import _ from "lodash";
+import React, { Component } from "react";
+
+function Search() {
+  const _handle = value => {
+    console.log(value);
+  };
+
+  const debounceHandler = _.debounce(_handle, 500);
+
+  const onChange = e => {
+    debounceHandler(e.target.value);
+  };
+
+  return (
+    <div>
+      Search:
+      <input onChange={onChange} />
+    </div>
+  );
+}
+
+export default Search;
+```
+
+**要点总结：**
+
+1. 设置一个同步处理函数_handle，该函数接受传来的value值，下面就和普通的回调函数一样执行业务代码即可
+2. 通过一个debounceHandler，调用bounce来生成一个防抖的回调函数
+3. 定义一个绑定的onChange函数，并指定传参到debounceHandler中即可
+
+**注意：**这个debonceHandler不能定义在onChange函数内！！！！！非常重要。因为lodash的debounce是通过闭包来维护一个内部的timer,来控制当指定时间段内，多次事件合并。如果定义在onChange内，每次都会多产生一个闭包环境，仍然会导致多个回调函数被触发，达不到防抖的效果，切忌切忌
+
+##### ４. 结果展示
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20200111120917697.gif)
+
+
+
+上述代码请查看[codesandbox demo](https://codesandbox.io/s/weathered-http-gc6mn)
+
+
+
+#### 14. React Hook: useContext + useReducer代替redux
+
+##### 0. 背景
+
+当组件嵌套很深，通过一直传参的方法来实现会非常麻烦，为了共享一些参数，一般可以通过Context来实现参数的托管，如果要对部分参数进行修改，可以通过redux或者mobx来做状态的集中管理。在有了React hooks之后，通过Context + useReducer完成Redux的功能，这里做一个简单的记录。
+
+##### 1. react hook useContext
+
+在没有useContext的时候，类组件调用Context需要三要素
+
++ CreateContext
+
++ Context.Provider
++ Context.Consumer
+
+其简单的使用方法可参考[React Context的简单使用](https://blog.csdn.net/qq_24724109/article/details/96772620)
+
+
+
+当有了useContext，在函数式组件中也可以调用Context了，并且useContext可以直接获得最近的指定的Context中传递的参数，相当于代替了Context.Consumer, 因此，这个时候的三要素转换为了
+
++ CreateContext
++ Context.Provider
++ useContext
+
+
+
+##### 2. react hook useContext例子
+
+###### 1. 简单例子效果
+
+![](/home/cyx/Desktop/Learning/ReactBlog/img/Peek 2020-01-13 10-17.gif)
+
+###### 2. SwitchHeader组件的封装
+
+**方法一：使用Context传统的传参方式实现**
+
+~~~typescript
+import React, { createContext, useState } from "react";
+
+//　SwitchHeader.tsx
+interface Props {
+  headerRender: () => JSX.Element;
+}
+
+export const SwitchHeader: React.FC<Props> = props => {
+  const { headerRender, children } = props;
+  const [isShow, setShow] = useState<boolean>(true);
+
+  const showHeader = () => setShow(true);
+  const hiddenHeader = () => setShow(false);
+
+  return (
+    <div>
+      <div style={{ display: isShow ? "block" : "none" }}>{headerRender()}</div>
+      {/* 
+      // @ts-ignore */}
+      {children({ showHeader, hiddenHeader })}
+    </div>
+  );
+};
+
+// App.tsx
+function App() {
+  const headerRender = () => (
+    <h1>
+      我这里是头组件：头头头
+    </h1>
+  );
+
+  return (
+    <SwitchHeader headerRender={headerRender}>
+      {({ showHeader, hiddenHeader }) => (
+        <>
+        　我是子组件控制按钮：
+          <button onClick={showHeader}>show</button>
+          <button onClick={hiddenHeader}>hidden</button>
+        </>
+      )}
+    </SwitchHeader>
+  );
+}
+~~~
+
+*关键步骤：*将children作为一个函数，然后通过children向子组件传参,之后通过该SwitchHeader包裹的子组件可以通过showHeader和hiddenHeader来控制header的消失与否
+
+**方法二：**利用Context的方法来实现
+
+~~~typescript
+// SwichHeader.tsx
+import React, { createContext, useState } from "react";
+
+interface Props {
+  headerRender: () => JSX.Element;
+}
+
+export interface IHeaderControl {
+  showHeader: () => void;
+  hiddenHeader: () => void;
+}
+
+export const HeaderControl = createContext<IHeaderControl>({
+  showHeader: () => {},
+  hiddenHeader: () => {}
+});
+
+export const SwitchHeader: React.FC<Props> = props => {
+  const { headerRender, children } = props;
+  const [isShow, setShow] = useState<boolean>(true);
+
+  const showHeader = () => setShow(true);
+  const hiddenHeader = () => setShow(false);
+
+  return (
+    <HeaderControl.Provider
+      value={{
+        showHeader,
+        hiddenHeader
+      }}
+    >
+      <div style={{ display: isShow ? "block" : "none" }}>{headerRender()}</div>
+      {children}
+    </HeaderControl.Provider>
+  );
+};
+
+// App.tsx
+import * as React from "react";
+import { render } from "react-dom";
+import { SwitchHeader, HeaderControl } from "./useHeader";
+
+import "./styles.css";
+
+function Index() {
+  const { useContext } = React;
+  const { showHeader, hiddenHeader } = useContext(HeaderControl);
+
+  return (
+    <>
+      <button onClick={showHeader}>show</button>
+      <button onClick={hiddenHeader}>hidden</button>
+    </>
+  );
+}
+
+function App() {
+  const headerRender = () => <h1>我这里是头组件：头头头</h1>;
+
+  return (
+    <SwitchHeader headerRender={headerRender}>
+      <Index />
+    </SwitchHeader>
+  );
+}
+
+const rootElement = document.getElementById("root");
+render(<App />, rootElement);
+
+~~~
+
+***使用Context的几个点***
+
++ 当使用useContext的时候需要传入对应的Context的值，且获取的这个Context应该是最近的一个Provider给的
++ 在使用typescript的时候需要给CreateContext一个初始值
++ 使用CreateContext的步骤和类组件类似
+
+##### 3. useReducer+Context
+
+上面已经实现了将状态通过父组件进行托管，但是我们通过仅通过useState可能无法完成复杂的状态操作，因此通过useReducer来完成状态的复杂操作。
+
+**对useReducer的理解**：useReducer其实和useState一样都是异步来重置某一个元素的状态的，但是useState通常只是修改某一个值，如果修改值之后需要进行回调操作可以通过useState+useEffect来实现，但是useReducer其本身内部可以接受外部参数然后做一些业务操作之后再修改值。
+
+因此利用这个原理，我们将**Context中的value传递的的为state和dispatch**，来实现在useReducer中对状态的统一处理
+
+###### 0.一个简单计数器的效果
+
+![](/home/cyx/Desktop/Learning/ReactBlog/img/Peek 2020-01-13 11-29.gif)
+
+
+
+###### 1. 代码实现
+
++ useReducer的使用
+
+  + 定义reducer
+  + 定义初始值
+  + 使用useReducer获取state,和dispatch
+
++ 注意点
+
+  + 在定义reducer的时候传入state的类型和最后操作完返回的state的类型一定要一致，不然typescript会报错,例如下面这个，说返回的类型是never
+
+  ![](/home/cyx/Desktop/Learning/ReactBlog/img/选区_150.png)
+
+~~~typescript
+const initCounter: IState = { count: 0 };
+
+const reducer = (state: IState, action: IAction) => {
+  const { type, payload } = action;
+  const { count } = state;
+  switch (type) {
+    case "add":
+      return { count: payload ? payload + count : count + 1 };
+    case "decrease":
+      return { count: count - 1 };
+    default:
+      return null;
+  }
+};
+
+function Test() {
+  	const [state, dispatch] = useReducer(reducer, initCounter);
+	// 业务代码通过state得到保存的状态，利用dispatch来控制
+}
+~~~
+
+
+
++ 获得了state和dispatch之后就通过Context传给子组件即可
+
+~~~typescript
+export const HeaderControl = createContext<IHeaderControl>({
+  showHeader: () => {},
+  hiddenHeader: () => {},
+  state: initCounter,
+  dispatch: value => {}
+});
+
+export const SwitchHeader: React.FC<Props> = props => {
+  const { headerRender, children } = props;
+  const [isShow, setShow] = useState<boolean>(true);
+
+  const showHeader = () => setShow(true);
+  const hiddenHeader = () => setShow(false);
+
+  const [state, dispatch] = useReducer(reducer, initCounter);
+
+  return (
+    <HeaderControl.Provider
+      value={{
+        showHeader,
+        hiddenHeader,
+        state,
+        dispatch
+      }}
+    >
+      {state.count}
+      <div style={{ display: isShow ? "block" : "none" }}>{headerRender()}</div>
+      {children}
+    </HeaderControl.Provider>
+  );
+};
+~~~
+
+
+
++ 在子组件中调用的过程
+  + 直接通过useContext，获取响应的state和dispatch即可
+
+~~~typescript
+import * as React from "react";
+import { render } from "react-dom";
+import { SwitchHeader, HeaderControl } from "./useHeader";
+
+import "./styles.css";
+
+function Index() {
+  const { useContext, useState } = React;
+  // 直接通过useContext调用即可
+  const { showHeader, hiddenHeader, dispatch } = useContext(HeaderControl);
+  const [value, setValue] = useState<number>(1);
+  return (
+    <>
+      <input
+        type="number"
+        value={value}
+        onChange={e => setValue(+e.target.value)}
+      />
+      <button onClick={showHeader}>show</button>
+      <button onClick={hiddenHeader}>hidden</button>
+      <button onClick={() => dispatch({ type: "add", payload: value })}>
+        add
+      </button>
+      <button onClick={() => dispatch({ type: "decrease" })}>decrease</button>
+    </>
+  );
+}
+
+function App() {
+  const headerRender = () => <h1>我这里是头组件：头头头</h1>;
+
+  return (
+    <SwitchHeader headerRender={headerRender}>
+      <Index />
+    </SwitchHeader>
+  );
+}
+
+const rootElement = document.getElementById("root");
+render(<App />, rootElement);
+
+~~~
 

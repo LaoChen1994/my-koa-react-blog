@@ -1,8 +1,7 @@
-import React, { useContext, useEffect } from 'react';
+import React from 'react';
 import { ITodoInfo } from '../../api/interface';
 import { TCardSlidUp } from '../../component/MyCard';
 import styles from './style.module.scss';
-import { UserContext } from '../../store/users';
 
 import { finishItem, recallItem, deleteItem } from '../../api/todo';
 import { Notify, Button, Dialog } from 'zent';
