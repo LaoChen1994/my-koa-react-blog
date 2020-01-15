@@ -1,6 +1,6 @@
 const upLoadFile = require('../routes/utils/upload');
 const path = require('path');
-const { setCtxBody, to, timeFormat, genResp } = require('../utils.js');
+const { setCtxBody, to, timeFormat } = require('../utils.js');
 const { query } = require('../model/utils/query.js');
 const { SqlHandler } = require('../model/utils/handleSql');
 const iconv = require('iconv-lite');
