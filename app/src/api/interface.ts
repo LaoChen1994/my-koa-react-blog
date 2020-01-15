@@ -55,6 +55,8 @@ export type TUserLogin = (
   ICommonApiInterface<IStatus & { userInfo: Omit<IUserState, 'isLogin'> }>
 >;
 
+export type TReturnData<T> = IStatus & IData<T>
+
 export interface ITodoInfo {
   userId: number;
   todoItem: string;
@@ -72,12 +74,24 @@ export interface IBlogContent {
   content: string;
 }
 
+export interface IFileInfo {
+  fileName: string;
+  publishDate: string;
+  fileId: number;
+  fileBrief: string;
+  authoId: number;
+  location: string;
+  downloadNumber: number;
+}
+
 export type TAddTodoProps = Omit<ITodoInfo, 'todoId' | 'isExpire'>;
 export type TAddModifyProps = Omit<ITodoInfo, 'userId' | 'isExpire'>;
 export type TBlogDetailInfo = IBlogInfo & {
   tags: IBlogTag[];
   blogNumber: number;
 } & Pick<IUserState, 'avatarUrl' | 'username'>;
+export type TFileListParams = Omit<IFileInfo, 'authorId'> &
+  Pick<IUserState, 'userId' | 'username' | 'avatarUrl'>;
 
 export type TUserRegister = (
   username: string,
@@ -158,3 +172,20 @@ export interface IUploadResponse {
   msg: string;
   status: boolean;
 }
+
+export type TAddNewFile = (
+  filename: string,
+  fileBrief: string,
+  authorId: number,
+  location: string
+) => Promise<ICommonApiInterface<IStatus>>;
+
+export type TGetFileList = (
+  pageSize: number,
+  pageNumber: number,
+  userId?: number
+) => Promise<
+  ICommonApiInterface<Omit<IStatus, 'token'> & IData<TFileListParams[]>>
+>;
+
+export type TAddDownloadNum = (fileId: number) => Promise<ICommonApiInterface<TReturnData<{}>>>

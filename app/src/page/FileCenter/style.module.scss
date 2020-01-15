@@ -1,0 +1,12 @@
+@import '../../static/style/mixins.scss';
+
+.wrapper {
+  @extend .pageWidth;
+  @extend .blockBorder;
+  @extend .pageBackground;
+  margin-top: 50px;
+}
+
+.uploadBtn {
+  @include splitLine(bottom);
+}

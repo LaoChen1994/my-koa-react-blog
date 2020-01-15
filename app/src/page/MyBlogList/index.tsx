@@ -40,7 +40,7 @@ export const MyBlogList: React.FC<Props> = () => {
             ...pagination,
             total: totalNumber,
             pageSize,
-            current: pageNumber+1
+            current: pageNumber + 1
           });
           setBlogs(blogList);
         })();
@@ -61,7 +61,7 @@ export const MyBlogList: React.FC<Props> = () => {
     _getListInfo(pageNumber, pageSize);
     setPagination({
       ...pagination,
-      current: pageNumber+1
+      current: pageNumber + 1
     });
   }, [pageNumber]);
 
@@ -70,7 +70,7 @@ export const MyBlogList: React.FC<Props> = () => {
     if (pageNumber === current - 1) {
       Notify.warn(`当前页为第${current}页`);
     }
-    setPage(current-1);
+    setPage(current - 1);
   };
 
   return (
@@ -81,7 +81,11 @@ export const MyBlogList: React.FC<Props> = () => {
       <div className={styles.b2}>
         <div className={styles.content}>
           {myBlogs.map((elem, index) => (
-            <BlogCard data={elem} key={`blog-card-${index}`}></BlogCard>
+            <BlogCard
+              data={elem}
+              key={`blog-card-${index}`}
+              isEditable={true}
+            ></BlogCard>
           ))}
         </div>
         <div className={styles.pagination}>

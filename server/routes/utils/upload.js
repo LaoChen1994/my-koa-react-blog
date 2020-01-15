@@ -5,11 +5,19 @@ const uploadFile = async (ctx, filePath) => {
   const file = ctx.request.files.file;
   const extname = path.extname(file.name);
 
-  const fileName = `${Math.random()
+  let fileName = `${Math.random()
     .toString(36)
     .substr(2)}${extname}`;
 
-  const fileLocation = `${filePath}/${fileName}`;
+  let fileLocation = `${filePath}/${fileName}`;
+
+  while (fs.existsSync(fileLocation)) {
+    fileName = `${Math.random()
+      .toString(36)
+      .substr(2)}${extname}`;
+  
+    fileLocation = `${filePath}/${fileName}`;
+  }
 
   return new Promise((resolve, reject) => {
     try {

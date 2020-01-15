@@ -29,7 +29,7 @@ app.use((ctx, next) => {
   return next().catch(err => {
     if (err.status === 401) {
       ctx.status = 401;
-      ctx.body = genResp(false, 'User Verify failed', {})
+      ctx.body = genResp(false, 'User Verify failed', {});
     } else {
       throw err;
     }
@@ -44,12 +44,11 @@ app.use(
   })
 );
 
-
 app.use(
   koaBody({
     multipart: true,
     formidable: {
-      maxFileSize: 1024 * 1024 * 100
+      maxFileSize: 1000 * 1000 * 100
     },
     patchKoa: true
   })

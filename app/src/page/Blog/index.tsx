@@ -58,7 +58,7 @@ const CBlog = (props: Props & RouteComponentProps) => {
         <Route path={`${path}/artical/:blogId`}>
           <ArticlePanel></ArticlePanel>
         </Route>
-        <Route path={`${path}/blogEdit`}>
+        <Route path={`${path}/blogEdit/:blogId`}>
           <WriteBlog></WriteBlog>
         </Route>
         <Route path={`${path}/:userId`} exact>

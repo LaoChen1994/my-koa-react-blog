@@ -1,0 +1,28 @@
+@import "../../static/style/mixins.scss";
+
+.wrapper {
+  @extend .blockBorder;
+  margin: 10px auto;
+  padding: 20px;
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.titleText {
+  @extend .subtitle;
+  font-size: 18px;
+}
+
+.downloads {
+  margin-right: 10px;
+  @extend .normal_text;
+}
+
+.brief {
+  @extend .large_text;
+  margin: 10px auto;
+}

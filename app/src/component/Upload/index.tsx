@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
-import { ApiHost } from '../../constant';
-import { Button, FormControl, Progress } from 'zent';
+import {
+  Button,
+  FormControl,
+  Progress,
+  Form,
+  FieldUtils,
+  Validators,
+  Notify
+} from 'zent';
+
+const { useField } = Form;
+const { makeChangeHandler } = FieldUtils;
 
 export type UploadCompletCallback<T> = (
   e: ProgressEvent<XMLHttpRequestEventTarget>,
@@ -20,12 +30,37 @@ interface Props {
   hasProcess?: boolean;
   title: string;
   uploadPath: string;
+  isInField?: boolean;
+  maxFileSize?: number;
+}
+
+export interface IUploadInfo {
+  originName: string;
+  fileName: string;
+  filePath: string;
 }
 
 export const UploadBtn: React.FC<Props> = props => {
-  const { onComplete, onStart, onProcess, hasProcess = false, title, uploadPath } = props;
+  const {
+    onComplete,
+    onStart,
+    onProcess,
+    hasProcess = false,
+    title,
+    uploadPath,
+    isInField = false,
+    maxFileSize = 1000 * 1000 * 3
+  } = props;
   const [progress, setProgress] = useState<number>(0);
   const [uploadStatus, setStatus] = useState<boolean>(false);
+  const uploadName = useField<IUploadInfo[]>(
+    'files',
+    [],
+    [Validators.required('请选择文件')]
+  );
+  const [nameList, setNameList] = useState<string[]>([]);
+
+  const handleInField = makeChangeHandler(uploadName);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -35,15 +70,28 @@ export const UploadBtn: React.FC<Props> = props => {
 
       // 将文件处理成formData
       let formData = new FormData();
+      if (files[0].size > maxFileSize) {
+        Notify.error(`上传文件过大，最大不能超过${maxFileSize / 1000 / 1000}M`);
+        return;
+      }
+
       for (let k in files) {
         formData.append('file', files[k], window.encodeURI(files[k].name));
       }
+
+      setNameList(
+        Array.prototype.map.call(files, elem => elem.name) as string[]
+      );
+
+      const token = localStorage.getItem('userToken');
 
       let xhr = new XMLHttpRequest();
 
       xhr.responseType = 'json';
       xhr.timeout = 5000;
       xhr.open('POST', uploadPath, true);
+
+      token && xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
       // 事件监听
       xhr.addEventListener('loadstart', e => {
@@ -60,7 +108,16 @@ export const UploadBtn: React.FC<Props> = props => {
 
       xhr.addEventListener('load', e => {
         const result = xhr.response;
+        const { fileName, filePath } = result.data;
         onComplete && onComplete(e, result);
+
+        const upLoadInfo: IUploadInfo = {
+          originName: files[0].name,
+          fileName,
+          filePath
+        };
+
+        isInField && handleInField([upLoadInfo]);
       });
 
       xhr.send(formData);
@@ -74,12 +131,31 @@ export const UploadBtn: React.FC<Props> = props => {
     //@ts-ignore
     btn && btn.click();
   };
+
+  const handleLoad = (e: any) => {
+    console.log('isLoaded');
+    console.log(e);
+  };
+
   return (
     <FormControl label={title}>
-      <input type="file" onChange={handleChange} style={{ display: 'none' }} />
+      <input
+        type="file"
+        onChange={handleChange}
+        style={{ display: 'none' }}
+        onLoad={handleLoad}
+      />
       <Button onClick={selectFile}>上传</Button>
+      <div style={{ display: uploadStatus ? 'block' : 'none' }}>
+        文件:
+        {nameList.map((elem, index) => (
+          <span key={`file-${index}`} style={{ margin: '0 10px' }}>
+            {elem}
+          </span>
+        ))}
+        上传完成
+      </div>
       {hasProcess && uploadStatus && <Progress percent={progress}></Progress>}
     </FormControl>
   );
 };
-

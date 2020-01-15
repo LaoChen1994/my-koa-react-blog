@@ -18,7 +18,7 @@ import { UserContext } from '../../store/users';
 import { IWriterRefExpose } from './interface';
 import { getUserTags, addBlog } from '../../api/blog';
 
-import { useHistory } from 'react-router-dom';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 
 interface IFormState {
   title: string;
@@ -33,6 +33,7 @@ export const WriteBlog: React.FC<Props> = props => {
   const [userTags, setUserTag] = useState<IBlogTag[]>([]);
   const { state } = useContext(UserContext);
   const history = useHistory();
+  const { params } = useRouteMatch();
 
   const addNewBlog = async () => {
     if (writerRef.current) {
@@ -75,6 +76,7 @@ export const WriteBlog: React.FC<Props> = props => {
       const { data: tagsList } = data;
       setUserTag(tagsList);
     }
+    console.log(params);
 
     updateTags();
   }, [state]);
