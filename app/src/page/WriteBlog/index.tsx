@@ -16,7 +16,7 @@ import { CloseTags, TNewTags } from '../../component/TagsSelection/CloseTags';
 import { UserContext } from '../../store/users';
 
 import { IWriterRefExpose } from './interface';
-import { getUserTags, addBlog } from '../../api/blog';
+import { getUserTags, addBlog, getBlogDetail } from '../../api/blog';
 
 import { useHistory, useRouteMatch } from 'react-router-dom';
 
@@ -33,7 +33,9 @@ export const WriteBlog: React.FC<Props> = props => {
   const [userTags, setUserTag] = useState<IBlogTag[]>([]);
   const { state } = useContext(UserContext);
   const history = useHistory();
-  const { params } = useRouteMatch();
+  const { params } = useRouteMatch<{ blogId: string }>();
+  const [title, setTitle] = useState<string>('');
+  const [content, setContent] = useState<string>('')
 
   const addNewBlog = async () => {
     if (writerRef.current) {
@@ -50,13 +52,12 @@ export const WriteBlog: React.FC<Props> = props => {
 
       const { status, msg } = data;
 
-      if(status) {
+      if (status) {
         Notify.success(msg);
         history.push('/');
       } else {
         Notify.error(msg);
       }
-
     } else {
       Notify.error('未获取到文章信息！');
     }
@@ -71,12 +72,26 @@ export const WriteBlog: React.FC<Props> = props => {
   };
 
   useEffect(() => {
+    const { blogId } = params;
+
     async function updateTags() {
       const { data } = await getUserTags(state.userId);
       const { data: tagsList } = data;
       setUserTag(tagsList);
     }
-    console.log(params);
+
+    async function getDetail(blogId: number) {
+      const { data } = await getBlogDetail(blogId);
+      const { data: blogDetail } = data;
+      console.log(blogDetail)
+      setTitle(blogDetail.blogName);
+      setContent(blogDetail.blogContent);
+    }
+
+
+    if (blogId) {
+      getDetail(+blogId);
+    }
 
     updateTags();
   }, [state]);
@@ -94,10 +109,11 @@ export const WriteBlog: React.FC<Props> = props => {
             required
             props={{
               maxLength: 100,
-              width: '100%'
+              width: '100%',
             }}
             label="文章标题:"
             className={styles.titleHeader}
+            defaultValue={title}
           ></FormInputField>
 
           <div className={styles.headerBtn}>
@@ -108,7 +124,9 @@ export const WriteBlog: React.FC<Props> = props => {
         </div>
 
         <div className={styles.textEditor}>
-          <RefWriter ref={writerRef}></RefWriter>
+          {/* 
+          //@ts-ignore */}
+          <RefWriter ref={writerRef} defaultValue={content}></RefWriter>
         </div>
         {/* 
         // @ts-ignore */}

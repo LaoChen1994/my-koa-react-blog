@@ -6,10 +6,11 @@ import { IUploadResponse, ICommonApiInterface } from '../../api/interface';
 
 interface Props {
   myRef: React.Ref<any>;
+  defaultValue?: string;
 }
 
 const Writer: React.FC<Props> = props => {
-  const { myRef } = props;
+  const { myRef, defaultValue } = props;
 
   const [content, setContent] = useState<any>(
     BraftEritor.createEditorState(null)
@@ -84,6 +85,7 @@ const Writer: React.FC<Props> = props => {
         value={content}
         onChange={handleChange}
         media={{ uploadFn: mediaUpload }}
+        {...(defaultValue ? { defaultValue } : {})}
       ></BraftEritor>
     </div>
   );
