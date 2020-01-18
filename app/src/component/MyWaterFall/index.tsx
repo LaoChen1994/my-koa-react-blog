@@ -47,31 +47,36 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
 
   // 监听整个页面scroll方法
   const _handleScroll = (scrollTop: number) => {
-    const { current } = wrapperRef;
-    const { offsetHeight } = current as HTMLDivElement;
-    const { innerHeight, pageYOffset } = window;
-
-    console.log(pageYOffset, lastPageOffset)
-    const isDown = pageYOffset - lastPageOffset > 0;
-    setLastHeight(pageYOffset);
-
-    if (scrollTop + innerHeight >= offsetHeight && isDown) {
-      new Promise<boolean>((resolve, reject) => {
-        setLoading(true);
-        handleLoading && handleLoading(pos, resolve, reject);
-      })
-        .then(data => {
-          setPos(pos + 1);
-          setLoading(false);
-        })
-        .catch(data => {
-          setNotes(data);
+    try {
+      const { current } = wrapperRef;
+      const { offsetHeight } = current as HTMLDivElement;
+      const { innerHeight, pageYOffset } = window;
+  
+      console.log(pageYOffset, lastPageOffset)
+      const isDown = pageYOffset - lastPageOffset > 0;
+      setLastHeight(pageYOffset);
+  
+      if (scrollTop + innerHeight >= offsetHeight && isDown) {
+        new Promise<boolean>((resolve, reject) => {
           setLoading(true);
+          handleLoading && handleLoading(pos, resolve, reject);
         })
-        .finally(() => {
-          console.log('set false');
-        });
+          .then(data => {
+            setPos(pos + 1);
+            setLoading(false);
+          })
+          .catch(data => {
+            setNotes(data);
+            setLoading(true);
+          })
+          .finally(() => {
+            console.log('set false');
+          });
+      }
+    } catch (error) {
+      console.log(error.msg)
     }
+
   };
 
   const debounced = debounce(_handleScroll, 500);

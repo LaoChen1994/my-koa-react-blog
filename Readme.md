@@ -792,7 +792,7 @@ export function ErrorInput() {
 ~~~
 
 *上述代码看上去没啥问题，但是我们实际在输入框中改变Input的值的时候会出现以下报错*
-![](/home/cyx/Desktop/Learning/ReactBlog/img/选区_149.png)
+![](./img/选区_149.png)
 
 这里存在的问题是，因为event事件是同步的，而通过debounce之后，会将多次的事件合并为一次，进行执行，因此该event性质会被改变不再是同步传过来的变量了，因此会有该警告
 
@@ -877,7 +877,7 @@ export default Search;
 
 ###### 1. 简单例子效果
 
-![](/home/cyx/Desktop/Learning/ReactBlog/img/Peek 2020-01-13 10-17.gif)
+![](./img/Peek 2020-01-13 10-17.gif)
 
 ###### 2. SwitchHeader组件的封装
 
@@ -1022,7 +1022,7 @@ render(<App />, rootElement);
 
 ###### 0.一个简单计数器的效果
 
-![](/home/cyx/Desktop/Learning/ReactBlog/img/Peek 2020-01-13 11-29.gif)
+![](./img/Peek 2020-01-13 11-29.gif)
 
 
 
@@ -1038,7 +1038,7 @@ render(<App />, rootElement);
 
   + 在定义reducer的时候传入state的类型和最后操作完返回的state的类型一定要一致，不然typescript会报错,例如下面这个，说返回的类型是never
 
-  ![](/home/cyx/Desktop/Learning/ReactBlog/img/选区_150.png)
+  ![](./img/选区_150.png)
 
 ~~~typescript
 const initCounter: IState = { count: 0 };
@@ -1149,3 +1149,202 @@ render(<App />, rootElement);
 
 ~~~
 
+#### 15.  React异步载入组件封装
+
+##### 1. 场景叙述
+
+今天，碰到这样一个问题，就是当表单重载修改的时候，需要根据接口返回的数据来实现表单的初始化，如果是自己封装的受控组件的话，其实很简单，直接通过value赋值，然后通过onChange做后续的改变就好了。我使用的是Zent组件库，在实际操作的时候发现这么一个问题，就是封装好的组件库中的defaultValue，他只能将第一次传入的值作为初始值，当通过异步请求得到defaultValue再改变其值的话，无法得到相应改变!
+
+##### 2. 场景模拟
+
+好吧，说了这么多可能没了解我的意思，我们来模拟一下这个场景
+
+~~~react
+// 先假设定义一个表单(抄的Zent的官网的例子)
+function Component(props) {
+  const { defaultValue } = props;
+  const form = Form.useForm(FormStrategy.View);
+  return (
+    <Form layout="horizontal" form={form}>
+      <FormInputField
+        name="name"
+        label={
+          <span>
+            用户名&nbsp;
+            <Pop trigger="hover" content="用户名用于个人账号登录" centerArrow>
+              <Icon type="error-circle-o" />
+            </Pop>
+            :
+          </span>
+        }
+        defaultValue={defaultValue || "123"}
+        validators={[
+          Validators.minLength(5, "用户名至少 5 个字"),
+          Validators.maxLength(25, "用户名最多 25 个字")
+        ]}
+        helpDesc="用户名为5-25个字"
+        required="必填"
+      />
+      <FormInputField
+        name="password"
+        type="password"
+        label="密码:"
+        helpDesc={
+          <span>
+            密码由英文字母、数字组成
+            <a href="https://youzan.com" target="_blank">
+              查看更多
+            </a>
+          </span>
+        }
+        validateOccasion={
+          Form.ValidateOccasion.Blur | Form.ValidateOccasion.Change
+        }
+        validators={[
+          Validators.pattern(/^[a-zA-Z0-9]+$/, "只允许英文字母和数字")
+        ]}
+        notice="重要提示：填写后无法修改，请谨慎设置"
+        required="必填"
+      />
+      <FormInputField
+        className="demo-form-basic-email"
+        label="E-Mail:"
+        name="email"
+        validators={[
+          Validators.required("必填"),
+          Validators.email("请输入正确的邮箱")
+        ]}
+      />
+    </Form>
+  );
+}
+~~~
+
+我想定义对用户名进行异步初始值的定义，用setTimeout模拟一个调用接口的过程 
+
+~~~react
+export default function App() {
+  const [defaultValue, setValue] = useState("");
+  const _getValue = () => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => resolve("Init123"), 500);
+    });
+  };
+
+  const loadFunc = value => () => <Component defaultValue={value} />;
+
+    useEffect(() => {
+
+    const getValue = async () => {
+      const data = await _getValue()
+      console.log(data);
+      setValue(data);
+    }
+
+    getValue()    
+
+  }, [])
+
+  return (
+    <div className="App">
+      <h1>Hello CodeSandbox</h1>
+      <h2>Start editing to see some magic happen!</h2>
+      <Component defaultValue={defaultValue} />
+    </div>
+  );
+}
+~~~
+
+上述代码理论上随着defaultValue变为Init123，应该用户名的默认值会变为Init123, 然而其默认值还是123
+
+![](/home/czx/Desktop/Learn/my-koa-react-blog/img/Selection_008.png)
+
+##### 3. 原因分析
+
+主要原因是***FormInputField只在组件加载的时候将该value设置为defaultValue，因此当后续改变defaultValue并不会改变该input的value值***。要解决该问题有两个方法。
+
++ 检测当default变化时才加载组件(类似组件的懒加载)
+
+~~~react
+export default function App() {
+
+  const [defaultValue, setValue] = useState("");
+
+  useEffect(() => {
+
+    const getValue = async () => {
+      const data = await _getValue()
+      console.log(data);
+      setValue(data);
+    }
+
+    getValue()    
+
+  }, [])
+
+  return (
+    <div className="App">
+      <h1>Hello CodeSandbox</h1>
+      <h2>Start editing to see some magic happen!</h2>javascript
+      {
+        defaultValue && <Component defaultValue={defaultValue} />
+      }
+    </div>
+  );
+}
+~~~
+
+这种方法确实可以解决这个问题，但是这种方法看上去不太优雅和通用，如果我们每次都需要判断一个值的存在与否来加载组件，有一些不方便，因此我们可以封装一个异步加载的组件，来完成这个工作。
+
++ 定义一个异步加载组件
+
+~~~react
+class AsyncComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      Component: null
+    };
+  }
+
+  async componentDidMount() {
+    const { asyncFunc, loadFunc } = this.props;
+
+    const data = await asyncFunc();
+    this.setState({
+      Component: loadFunc(data)
+    });
+  }
+
+  render() {
+    const { Component: MyList } = this.state;
+
+    return <div>{MyList && <MyList />}</div>;
+  }
+}
+~~~
+
++ 使用该组件的方法
+
+~~~react
+export default function App() {
+
+  const _getValue = () => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => resolve("Init123"), 500);
+    });
+  };
+
+  const loadFunc = value => () => <Component defaultValue={value} />;
+
+
+  return (
+    <div className="App">
+      <h1>Hello CodeSandbox</h1>
+      <AsyncComponent asyncFunc={_getValue} loadFunc={loadFunc} />
+    </div>
+  );
+}
+~~~
+
+![](./img/Selection_009.png)
