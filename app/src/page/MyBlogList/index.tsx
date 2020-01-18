@@ -48,6 +48,7 @@ export const MyBlogList: React.FC<Props> = () => {
   };
 
   const _getUserInfo = useCallback(async () => {
+    console.log(userId)
     const { data } = await getUserDetail(+userId);
     const { data: userDetail } = data;
     setUserInfo(userDetail);

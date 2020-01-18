@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from "react";
 import {
   Route,
   Switch,
@@ -6,14 +6,22 @@ import {
   Link,
   withRouter,
   RouteComponentProps
-} from 'react-router-dom';
-import { WriteBlog } from '../WriteBlog';
-import { Icon } from 'zent';
-import { ArticlePanel } from '../ArticlePanel';
-import { MyBlogList } from '../MyBlogList';
-import { UserContext } from '../../store/users';
+} from "react-router-dom";
+import { WriteBlog, IWriteBlogProps } from "../WriteBlog";
+import { Icon } from "zent";
+import { ArticlePanel } from "../ArticlePanel";
+import { MyBlogList } from "../MyBlogList";
+import { UserContext } from "../../store/users";
 
-import styles from './style.module.scss';
+import styles from "./style.module.scss";
+import { getBlogDetail } from "../../api/blog";
+import { AsyncComponent } from "../../hooks/AysncComponent";
+import {
+  ICommonApiInterface,
+  IStatus,
+  IData,
+  TBlogDetailInfo
+} from "../../api/interface";
 
 interface Props {}
 
@@ -23,6 +31,40 @@ const CBlog = (props: Props & RouteComponentProps) => {
   const { history, location } = props;
   const { state } = useContext(UserContext);
   const { userId } = state;
+
+  const _getBlogDetail = () => {
+    const blogIdRegx = /\/blog\/blogEdit\/(\d+)/gi;
+    if (blogIdRegx.exec(location.pathname)) {
+      const blogId = RegExp.$1;
+      return getBlogDetail(+blogId);
+    }
+
+    return new Promise((resolve, reject) => {
+      reject("Error Page");
+    });
+  }; 
+
+  const loadFunc = (
+    data: ICommonApiInterface<IStatus & IData<TBlogDetailInfo>>
+  ) => () => {
+    const { data: blogDetail } = data.data;
+
+    const defaultValue: IWriteBlogProps["defaultValue"] = {
+      title: blogDetail.blogName,
+      content: blogDetail.blogContent,
+      tags: blogDetail.tags
+    };
+
+    return (
+      <WriteBlog
+        defaultValue={{
+          title: defaultValue.title,
+          content: defaultValue.content,
+          tags: defaultValue.tags
+        }}
+      ></WriteBlog>
+    );
+  };
 
   useEffect(() => {
     const regx = /(?<=\/blog\/)[a-zA-Z]+.*/gi;
@@ -34,14 +76,13 @@ const CBlog = (props: Props & RouteComponentProps) => {
       if (!idReg.test(location.pathname)) {
         userId && ~userId
           ? history.push(`${url}/${userId}`)
-          : history.push('/');
+          : history.push("/");
       }
       return;
     }
 
     history.listen(data => {
       const { pathname } = data;
-      console.log(pathname)
       setTabStatus(!regx.test(pathname));
     });
   }, [location.pathname]);
@@ -58,8 +99,14 @@ const CBlog = (props: Props & RouteComponentProps) => {
         <Route path={`${path}/artical/:blogId`}>
           <ArticlePanel></ArticlePanel>
         </Route>
-        <Route path={`${path}/blogEdit/:blogId`}>
+        <Route path={`${path}/blogEdit`} exact>
           <WriteBlog></WriteBlog>
+        </Route>
+        <Route path={`${path}/blogEdit/:blogId`}>
+          <AsyncComponent
+            asyncFunc={_getBlogDetail}
+            loadFunc={loadFunc}
+          ></AsyncComponent>
         </Route>
         <Route path={`${path}/:userId`} exact>
           <MyBlogList></MyBlogList>

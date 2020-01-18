@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Button,
   FormControl,
@@ -7,7 +7,7 @@ import {
   FieldUtils,
   Validators,
   Notify
-} from 'zent';
+} from "zent";
 
 const { useField } = Form;
 const { makeChangeHandler } = FieldUtils;
@@ -32,6 +32,7 @@ interface Props {
   uploadPath: string;
   isInField?: boolean;
   maxFileSize?: number;
+  handleUploadRes?: (response: any) => { fileName: string; filePath: string };
 }
 
 export interface IUploadInfo {
@@ -49,14 +50,15 @@ export const UploadBtn: React.FC<Props> = props => {
     title,
     uploadPath,
     isInField = false,
-    maxFileSize = 1000 * 1000 * 3
+    maxFileSize = 1000 * 1000 * 3,
+    handleUploadRes
   } = props;
   const [progress, setProgress] = useState<number>(0);
   const [uploadStatus, setStatus] = useState<boolean>(false);
   const uploadName = useField<IUploadInfo[]>(
-    'files',
+    "files",
     [],
-    [Validators.required('请选择文件')]
+    [Validators.required("请选择文件")]
   );
   const [nameList, setNameList] = useState<string[]>([]);
 
@@ -75,26 +77,26 @@ export const UploadBtn: React.FC<Props> = props => {
         return;
       }
 
-      for (let k in files) {
-        formData.append('file', files[k], window.encodeURI(files[k].name));
+      for (let i = 0; i < files.length; i++) {
+        formData.append("file", files[0], window.encodeURI(files[0].name));
       }
 
       setNameList(
         Array.prototype.map.call(files, elem => elem.name) as string[]
       );
 
-      const token = localStorage.getItem('userToken');
+      const token = localStorage.getItem("userToken");
 
       let xhr = new XMLHttpRequest();
 
-      xhr.responseType = 'json';
+      xhr.responseType = "json";
       xhr.timeout = 5000;
-      xhr.open('POST', uploadPath, true);
+      xhr.open("POST", uploadPath, true);
 
-      token && xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      token && xhr.setRequestHeader("Authorization", `Bearer ${token}`);
 
       // 事件监听
-      xhr.addEventListener('loadstart', e => {
+      xhr.addEventListener("loadstart", e => {
         setProgress(0);
         setStatus(true);
         onStart && onStart(e);
@@ -106,9 +108,12 @@ export const UploadBtn: React.FC<Props> = props => {
         onProcess && onProcess(loaded, total);
       };
 
-      xhr.addEventListener('load', e => {
+      xhr.addEventListener("load", e => {
         const result = xhr.response;
-        const { fileName, filePath } = result.data;
+        console.log("result=", result);
+        const { fileName, filePath } = handleUploadRes
+          ? handleUploadRes(result)
+          : result;
         onComplete && onComplete(e, result);
 
         const upLoadInfo: IUploadInfo = {
@@ -133,7 +138,7 @@ export const UploadBtn: React.FC<Props> = props => {
   };
 
   const handleLoad = (e: any) => {
-    console.log('isLoaded');
+    console.log("isLoaded");
     console.log(e);
   };
 
@@ -142,14 +147,14 @@ export const UploadBtn: React.FC<Props> = props => {
       <input
         type="file"
         onChange={handleChange}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         onLoad={handleLoad}
       />
       <Button onClick={selectFile}>上传</Button>
-      <div style={{ display: uploadStatus ? 'block' : 'none' }}>
+      <div style={{ display: uploadStatus ? "block" : "none" }}>
         文件:
         {nameList.map((elem, index) => (
-          <span key={`file-${index}`} style={{ margin: '0 10px' }}>
+          <span key={`file-${index}`} style={{ margin: "0 10px" }}>
             {elem}
           </span>
         ))}

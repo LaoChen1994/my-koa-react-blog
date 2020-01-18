@@ -1,7 +1,7 @@
 module.exports = {
   sqlConfig: {
     host: 'localhost',
-    user: 'root',
+    user: 'cyx',
     password: 'mysql',
     database: 'KOA_BLOG',
     multipleStatements: true

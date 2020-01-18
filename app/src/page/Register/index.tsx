@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { userRegister, checkUser } from '../../api/user';
+import React, { useState } from "react";
+import { userRegister, checkUser } from "../../api/user";
 import {
   Form,
   FormStrategy,
@@ -7,14 +7,14 @@ import {
   Notify,
   Validators,
   Button
-} from 'zent';
+} from "zent";
 
-import { UploadBtn, UploadCompletCallback } from '../../component/Upload';
+import { UploadBtn, UploadCompletCallback } from "../../component/Upload";
 
-import styles from './style.module.scss';
-import { IValidator } from 'formulr';
-import { TLoadFileRes } from '../../api/interface';
-import { ApiHost } from '../../constant';
+import styles from "./style.module.scss";
+import { IValidator } from "formulr";
+import { TLoadFileRes } from "../../api/interface";
+import { ApiHost } from "../../constant";
 
 interface Props {}
 
@@ -27,7 +27,7 @@ export const Register: React.FC<Props> = () => {
 
     // @ts-ignore
     if (form.password !== value) {
-      return { name: 'passwordEqual', message: '前后两次密码输入不同' };
+      return { name: "passwordEqual", message: "前后两次密码输入不同" };
     }
 
     return null;
@@ -37,14 +37,13 @@ export const Register: React.FC<Props> = () => {
     form
       .validate(Form.ValidateOption.IncludeAsync | Form.ValidateOption.Default)
       .then((data: any[]): [boolean, any[]] => {
-        if (data.some(elem => elem === undefined)) {
-          return [false, ['尚有未填写的表格内容']];
+        if (data.slice(0, data.length - 2).some(elem => elem === undefined)) {
+          return [false, ["尚有未填写的表格内容"]];
         } else {
-          const errorList = data
-            .filter(elem => elem !== null)
-            .map(elem => elem.message);
+          const errorList = data.filter(elem => ![null, undefined].includes(elem));
+
           if (errorList.length) {
-            return [false, errorList];
+            return [false, errorList.map(elem => elem.message)];
           }
         }
 
@@ -102,23 +101,23 @@ export const Register: React.FC<Props> = () => {
           label="用户名:"
           name="username"
           props={{
-            placeholder: '请输入用户名'
+            placeholder: "请输入用户名"
           }}
           required
-          validators={[Validators.required('请输入用户名')]}
+          validators={[Validators.required("请输入用户名")]}
         ></FormInputField>
         <FormInputField
           label="密码"
           name="password"
           props={{
-            type: 'password',
-            placeholder: '请设置密码'
+            type: "password",
+            placeholder: "请设置密码"
           }}
           validators={[
-            Validators.required('请输入密码'),
+            Validators.required("请输入密码"),
             Validators.pattern(
               /(?=.{6,16})(?=.*\d)(?=.*[a-zA-Z])/,
-              '密码至少为6-16位且包含至少一个数字和字母'
+              "密码至少为6-16位且包含至少一个数字和字母"
             )
           ]}
           required
@@ -126,7 +125,7 @@ export const Register: React.FC<Props> = () => {
         <FormInputField
           label="确认密码"
           name="rPassword"
-          props={{ type: 'password', placeholder: '请再次输入密码' }}
+          props={{ type: "password", placeholder: "请再次输入密码" }}
           required
           validators={[validatePassword]}
         ></FormInputField>
@@ -134,9 +133,9 @@ export const Register: React.FC<Props> = () => {
           name="email"
           label="Email"
           required
-          validators={[Validators.email('请输入正确的email地址')]}
+          validators={[Validators.email("请输入正确的email地址")]}
           props={{
-            placeholder: '请输入Email地址'
+            placeholder: "请输入Email地址"
           }}
         ></FormInputField>
         <FormInputField
@@ -144,11 +143,11 @@ export const Register: React.FC<Props> = () => {
           label="手机号"
           required
           validators={[
-            Validators.required('请输入联系方式'),
-            Validators.pattern(/^1([3-9]\d{9})/, '请输入正确的联系方式')
+            Validators.required("请输入联系方式"),
+            Validators.pattern(/^1([3-9]\d{9})/, "请输入正确的联系方式")
           ]}
           props={{
-            placeholder: '请输入联系电话'
+            placeholder: "请输入联系电话"
           }}
         ></FormInputField>
 

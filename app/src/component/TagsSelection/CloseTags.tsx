@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Tag,
   Checkbox,
@@ -7,17 +7,18 @@ import {
   FieldUtils,
   Form,
   IInputChangeEvent,
-  Notify,
-} from 'zent';
-import styles from './style.module.scss';
+  Notify
+} from "zent";
+import styles from "./style.module.scss";
 
-import { IBlogTag } from '../../interface';
-import { initTags } from '../../constant';
-import { ValidateOption } from 'formulr';
+import { IBlogTag } from "../../interface";
+import { ValidateOption } from "formulr";
+import { initTags } from "../../constant";
 
 interface Props {
   data?: IBlogTag[];
-  layout?: 'vertical' | 'horizontal';
+  layout?: "vertical" | "horizontal";
+  isReloaded?: IBlogTag[];
 }
 
 export type TNewTags = IBlogTag & { isNew: boolean };
@@ -25,7 +26,7 @@ export type TNewTags = IBlogTag & { isNew: boolean };
 const { makeChangeHandler } = FieldUtils;
 
 export const CloseTags: React.FC<Props> = props => {
-  const { data = [] } = props;
+  const { data = [], isReloaded } = props;
   const MAX_TAGS_NUM = 5;
 
   const tagsData: TNewTags[] = data.map(elem => {
@@ -35,14 +36,25 @@ export const CloseTags: React.FC<Props> = props => {
     };
   });
 
+  // @ts-ignore
+  const reloadTags: [TNewTags[], number[]] = isReloaded
+    ? (() => {
+        const idList = isReloaded.map(elem => elem.tagId);
+        return [
+          tagsData.filter(elem => idList.includes(elem.tagId)),
+          idList
+        ];
+      })()
+    : [[], []];
+
   // 内部用于保存tag的数组
-  const [_tagList, _setTagList] = useState<typeof tagsData>([]);
-  const [value, SetValue] = useState<string>('');
+  const [_tagList, _setTagList] = useState<typeof tagsData>(reloadTags[0]);
+  const [value, SetValue] = useState<string>("");
   //　用于控制checkbox的
-  const [checkTags, setCheckTags] = useState<number[]>([]);
+  const [checkTags, setCheckTags] = useState<number[]>(reloadTags[1]);
 
   // 注册在上层Form中的参数名
-  const targList = Form.useField<TNewTags[]>('tags', []);
+  const targList = Form.useField<TNewTags[]>("tags", reloadTags[0]);
   const updateTagList = makeChangeHandler(targList, ValidateOption.Default);
 
   const handleClose = (tag: TNewTags) => (
@@ -108,9 +120,9 @@ export const CloseTags: React.FC<Props> = props => {
         }
       ];
       _setTagList(newTags);
-      SetValue('');
+      SetValue("");
     } else {
-      Notify.error('该文章类别已经存在，请勿重复插入相同标签');
+      Notify.error("该文章类别已经存在，请勿重复插入相同标签");
     }
   };
 
@@ -144,7 +156,7 @@ export const CloseTags: React.FC<Props> = props => {
             outline
             className={styles.tags}
             theme="green"
-            style={{ fontSize: '16px' }}
+            style={{ fontSize: "16px" }}
           >
             {elem.tagName}
           </Tag>
@@ -170,7 +182,7 @@ export const CloseTags: React.FC<Props> = props => {
               </Checkbox.Group>
             </div>
           ) : (
-            '暂无'
+            "暂无"
           )}
         </div>
       </FormControl>

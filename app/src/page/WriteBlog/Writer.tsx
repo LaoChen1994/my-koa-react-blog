@@ -6,13 +6,14 @@ import { IUploadResponse, ICommonApiInterface } from '../../api/interface';
 
 interface Props {
   myRef: React.Ref<any>;
+  defaultValue?: string;
 }
 
 const Writer: React.FC<Props> = props => {
-  const { myRef } = props;
+  const { myRef, defaultValue } = props;
 
   const [content, setContent] = useState<any>(
-    BraftEritor.createEditorState(null)
+    BraftEritor.createEditorState(defaultValue || "")
   );
 
   const handleChange = (newState: any) => {
@@ -89,6 +90,6 @@ const Writer: React.FC<Props> = props => {
   );
 };
 
-export const RefWriter = React.forwardRef<IWriterRefExpose>((props, ref) => (
+export const RefWriter = React.forwardRef<IWriterRefExpose, {defaultValue?: string}>((props, ref) => (
   <Writer {...props} myRef={ref}></Writer>
 ));

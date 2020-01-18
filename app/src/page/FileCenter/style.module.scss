@@ -10,3 +10,9 @@
 .uploadBtn {
   @include splitLine(bottom);
 }
+
+.emptyList {
+  text-align: center;
+  padding: 20px 0;
+  @extend .note_text;
+}

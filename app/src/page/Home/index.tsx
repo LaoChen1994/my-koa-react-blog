@@ -1,14 +1,14 @@
-import React, { useEffect, useContext, useState, useCallback } from 'react';
-import { getHome, getUndoList } from '../../api/home';
-import { getBlogList } from '../../api/blog';
-import { UserContext } from '../../store/users';
-import Welcome from './Welcome';
-import style from './style.module.scss';
-import { useHistory } from 'react-router-dom';
-import { Button, Collapse, Icon } from 'zent';
-import { TBlogBrief, ITodoInfo } from '../../api/interface';
-import { BlogCard } from '../../component/BlogCard';
-import { MyWaterfall, IWaterfallProps } from '../../component/MyWaterFall';
+import React, { useEffect, useContext, useState, useCallback } from "react";
+import { getHome, getUndoList } from "../../api/home";
+import { getBlogList } from "../../api/blog";
+import { UserContext } from "../../store/users";
+import Welcome from "./Welcome";
+import style from "./style.module.scss";
+import { useHistory } from "react-router-dom";
+import { Button, Collapse, Icon } from "zent";
+import { TBlogBrief, ITodoInfo } from "../../api/interface";
+import { BlogCard } from "../../component/BlogCard";
+import { MyWaterfall, IWaterfallProps } from "../../component/MyWaterFall";
 
 interface Props {}
 
@@ -19,7 +19,7 @@ const Home: React.FC<Props> = () => {
   const [blogList, setBlogList] = useState<TBlogBrief[]>([]);
   const [undoList, setUndoList] = useState<ITodoInfo[]>([]);
 
-  const [active, setActive] = useState<string | string[]>('map-0');
+  const [active, setActive] = useState<string | string[]>("map-0");
   const pageSize = 5;
 
   useEffect(() => {
@@ -39,7 +39,7 @@ const Home: React.FC<Props> = () => {
       getData();
       _getBlogList();
     } catch (error) {
-      console.log('err=', error);
+      console.log("err=", error);
     }
   }, []);
 
@@ -54,15 +54,15 @@ const Home: React.FC<Props> = () => {
   }, [state.userId]);
 
   const linkTodoList = () => {
-    history.push('/todoList');
+    history.push("/todoList");
   };
 
   const linkToBlog = () => {
-    history.push('/blog');
+    history.push("/blog");
   };
 
   const linkToWrite = () => {
-    history.push('/blog/blogEdit');
+    history.push("/blog/blogEdit");
   };
 
   const handleColChange = (value: string | string[]) => {
@@ -113,6 +113,11 @@ const Home: React.FC<Props> = () => {
               </Collapse.Panel>
             ))}
         </Collapse>
+        {!undoList.length && (
+          <div className={style.emptyNotes}>
+            <Icon type="expand-customer" /> <span>当前代办列表为空～</span>
+          </div>
+        )}
         <div className={style.panelControl}>
           <span onClick={linkTodoList}>
             <Icon type="checkin-o" /> 前去处理
@@ -122,7 +127,7 @@ const Home: React.FC<Props> = () => {
     );
   }, [undoList, active, linkTodoList]);
 
-  const handleScrolLoading: IWaterfallProps['handleLoading'] = useCallback(
+  const handleScrolLoading: IWaterfallProps["handleLoading"] = useCallback(
     async (page, resolve, reject) => {
       if (resolve) {
         const { data } = await getBlogList(pageSize, page);
@@ -133,7 +138,7 @@ const Home: React.FC<Props> = () => {
           resolve(true);
           setBlogList([...blogList, ..._bl]);
         } else {
-          reject && reject('已经到底啦～');
+          reject && reject("已经到底啦～");
         }
       }
     },
@@ -153,7 +158,7 @@ const Home: React.FC<Props> = () => {
           type="success"
           outline
           size="large"
-          style={{ marginLeft: '30px', width: '120px' }}
+          style={{ marginLeft: "30px", width: "120px" }}
           onClick={linkToBlog}
         >
           我的博客
@@ -163,7 +168,7 @@ const Home: React.FC<Props> = () => {
           onClick={linkToWrite}
           size="large"
           outline
-          style={{ marginLeft: '30px', width: '120px' }}
+          style={{ marginLeft: "30px", width: "120px" }}
         >
           写博客
         </Button>
