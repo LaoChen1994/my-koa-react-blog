@@ -92,3 +92,14 @@
     }
   }
 }
+
+.emptyNotes {
+  @extend .note_text;
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  font-size: 16px;
+  & > span {
+    margin-left: 10px;
+  }
+}

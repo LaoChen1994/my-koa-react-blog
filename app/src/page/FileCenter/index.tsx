@@ -1,10 +1,10 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react';
-import styles from './style.module.scss';
-import { UploadBtn, IUploadInfo } from '../../component/Upload';
-import { ApiHost } from '../../constant';
-import { UserContext } from '../../store/users';
-import { MyWaterfall, IWaterfallProps } from '../../component/MyWaterFall';
-import FileCard from '../../component/FileCard';
+import React, { useContext, useState, useEffect, useCallback } from "react";
+import styles from "./style.module.scss";
+import { UploadBtn, IUploadInfo } from "../../component/Upload";
+import { ApiHost } from "../../constant";
+import { UserContext } from "../../store/users";
+import { MyWaterfall, IWaterfallProps } from "../../component/MyWaterFall";
+import FileCard from "../../component/FileCard";
 import {
   Button,
   Dialog,
@@ -14,10 +14,10 @@ import {
   FormInputField,
   Validators,
   Notify
-} from 'zent';
+} from "zent";
 
-import { addNewFile, getFileList } from '../../api/file';
-import { TFileListParams } from '../../api/interface';
+import { addNewFile, getFileList } from "../../api/file";
+import { TFileListParams, TUploadResponse } from "../../api/interface";
 
 const { openDialog, closeDialog } = Dialog;
 
@@ -32,7 +32,7 @@ interface IFormValue {
 }
 
 export const FileCenter: React.FC<Props> = () => {
-  const dialogId = 'upLoadFile';
+  const dialogId = "upLoadFile";
   const form = Form.useForm(FormStrategy.View);
   const { state } = useContext(UserContext);
   const [currentPage, setPage] = useState<number>(1);
@@ -44,6 +44,7 @@ export const FileCenter: React.FC<Props> = () => {
     // @ts-ignore
     const value = form.getValue() as IFormValue;
     const { fileBrief, file, name } = value;
+    console.log(value);
     const { filePath } = file.files[0];
 
     const { data } = await addNewFile(name, fileBrief, state.userId, filePath);
@@ -57,7 +58,7 @@ export const FileCenter: React.FC<Props> = () => {
     }
   };
 
-  const handleScroll: IWaterfallProps['handleLoading'] = async (
+  const handleScroll: IWaterfallProps["handleLoading"] = async (
     page,
     resolve,
     reject
@@ -72,18 +73,27 @@ export const FileCenter: React.FC<Props> = () => {
         return;
       }
 
-      reject && reject('已经到底啦～');
+      reject && reject("已经到底啦～");
     }
   };
 
   const _getFileList = useCallback(
     async (pageNumber: number) => {
-      const { data } = await getFileList(pageSize, pageNumber, state.userId);
+      const { data } = await getFileList(pageSize, pageNumber, -1);
       setFileList(data.data);
       setPageUpdate(pageUpdate + 1);
     },
     [state.userId]
   );
+
+  const handleUploadRes = (response: TUploadResponse) => {
+    const { data } = response;
+    const { fileName, filePath } = data;
+    return {
+      fileName,
+      filePath
+    };
+  };
 
   useEffect(() => {
     _getFileList(currentPage);
@@ -92,20 +102,20 @@ export const FileCenter: React.FC<Props> = () => {
   const renderChild = () => (
     <Form form={form} layout="horizontal">
       <FormInputField
-        label={'文件名'}
+        label={"文件名"}
         name="name"
         required
-        validators={[Validators.required('请输入文件名')]}
+        validators={[Validators.required("请输入文件名")]}
       ></FormInputField>
 
       <FormInputField
-        label={'文件简介'}
+        label={"文件简介"}
         name="fileBrief"
         required
-        validators={[Validators.required('请填写文件的简介信息')]}
+        validators={[Validators.required("请填写文件的简介信息")]}
         props={{
-          type: 'textarea',
-          width: '80%'
+          type: "textarea",
+          width: "80%"
         }}
       ></FormInputField>
 
@@ -118,8 +128,9 @@ export const FileCenter: React.FC<Props> = () => {
           hasProcess
           isInField={true}
           maxFileSize={100 * 1000 * 1000}
+          handleUploadRes={handleUploadRes}
         ></UploadBtn>
-        <Button onClick={getFormValue} style={{ textAlign: 'right' }}>
+        <Button onClick={getFormValue} style={{ textAlign: "right" }}>
           提交文件
         </Button>
       </FieldSet>
@@ -129,7 +140,7 @@ export const FileCenter: React.FC<Props> = () => {
   const openUpload = () => {
     openDialog({
       dialogId,
-      title: '我要上传',
+      title: "我要上传",
       children: renderChild()
     });
   };
@@ -152,11 +163,9 @@ export const FileCenter: React.FC<Props> = () => {
               }}
             ></FileCard>
           ))}
-          {
-            !fileList.length && (
-              <div className={styles.emptyList}>文件列表为空~</div>
-            )
-          }
+          {!fileList.length && (
+            <div className={styles.emptyList}>文件列表为空~</div>
+          )}
         </MyWaterfall>
       </div>
     </div>

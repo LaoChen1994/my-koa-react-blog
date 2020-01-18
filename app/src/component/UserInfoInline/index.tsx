@@ -16,7 +16,7 @@ export default function index(props: Props): ReactElement {
     <div className={styles.bottom}>
       <img
         src={`${staticServer}${avatarUrl}`}
-        alt="用户头像"
+        // alt="用户头像"
         className={styles.avatar}
       />
       <span className={styles.author}>{name}</span>

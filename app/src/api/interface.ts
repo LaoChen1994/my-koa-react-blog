@@ -1,6 +1,6 @@
-import { IUserState, IBlogTag } from '../interface';
-import { TNewTags } from '../component/TagsSelection/CloseTags';
-import { string } from 'prop-types';
+import { IUserState, IBlogTag } from "../interface";
+import { TNewTags } from "../component/TagsSelection/CloseTags";
+import { string } from "prop-types";
 
 export interface ICommonApiInterface<T> {
   data: T;
@@ -40,7 +40,7 @@ export interface IBlogListStatic {
 }
 
 export type TBlogBrief = IBlogInfo & {
-  userName: IUserState['username'];
+  userName: IUserState["username"];
   avatarUrl?: string;
 };
 
@@ -52,10 +52,10 @@ export type TUserLogin = (
   username?: string,
   password?: string
 ) => Promise<
-  ICommonApiInterface<IStatus & { userInfo: Omit<IUserState, 'isLogin'> }>
+  ICommonApiInterface<IStatus & { userInfo: Omit<IUserState, "isLogin"> }>
 >;
 
-export type TReturnData<T> = IStatus & IData<T>
+export type TReturnData<T> = IStatus & IData<T>;
 
 export interface ITodoInfo {
   userId: number;
@@ -84,14 +84,14 @@ export interface IFileInfo {
   downloadNumber: number;
 }
 
-export type TAddTodoProps = Omit<ITodoInfo, 'todoId' | 'isExpire'>;
-export type TAddModifyProps = Omit<ITodoInfo, 'userId' | 'isExpire'>;
+export type TAddTodoProps = Omit<ITodoInfo, "todoId" | "isExpire">;
+export type TAddModifyProps = Omit<ITodoInfo, "userId" | "isExpire">;
 export type TBlogDetailInfo = IBlogInfo & {
   tags: IBlogTag[];
   blogNumber: number;
-} & Pick<IUserState, 'avatarUrl' | 'username'>;
-export type TFileListParams = Omit<IFileInfo, 'authorId'> &
-  Pick<IUserState, 'userId' | 'username' | 'avatarUrl'>;
+} & Pick<IUserState, "avatarUrl" | "username">;
+export type TFileListParams = Omit<IFileInfo, "authorId"> &
+  Pick<IUserState, "userId" | "username" | "avatarUrl">;
 
 export type TUserRegister = (
   username: string,
@@ -99,31 +99,31 @@ export type TUserRegister = (
   email: string,
   phoneNumber: string,
   avartarUrl?: string
-) => Promise<ICommonApiInterface<Omit<IStatus, 'token'>>>;
+) => Promise<ICommonApiInterface<Omit<IStatus, "token">>>;
 
 export type TValidateUser = () => Promise<
-  ICommonApiInterface<IStatus & { userInfo: Omit<IUserState, 'isLogin'> }>
+  ICommonApiInterface<IStatus & { userInfo: Omit<IUserState, "isLogin"> }>
 >;
 
 export type TCheckUsername = (
   username: string
-) => Promise<ICommonApiInterface<Omit<IStatus, 'token'>>>;
+) => Promise<ICommonApiInterface<Omit<IStatus, "token">>>;
 
-export type TLoadFileRes = Omit<IStatus, 'token'> &
-  Pick<IUserState, 'avatarUrl'>;
+export type TLoadFileRes = Omit<IStatus, "token"> &
+  Pick<IUserState, "avatarUrl">;
 
 export type TAddTodoItem = (
   e: TAddTodoProps
-) => Promise<ICommonApiInterface<Omit<IStatus, 'token'>>>;
+) => Promise<ICommonApiInterface<Omit<IStatus, "token">>>;
 
 export type TModifyTodoItem = (
   e: TAddModifyProps
-) => Promise<ICommonApiInterface<Omit<IStatus, 'token'>>>;
+) => Promise<ICommonApiInterface<Omit<IStatus, "token">>>;
 
 export type TGetTodoList = (
   userId: number
 ) => Promise<
-  ICommonApiInterface<{ data: Omit<IStatus, 'token'> & { data: ITodoInfo[] } }>
+  ICommonApiInterface<{ data: Omit<IStatus, "token"> & { data: ITodoInfo[] } }>
 >;
 
 export type TFinishItem = (
@@ -155,11 +155,19 @@ export type TGetCompleteList = (
 
 export type TGetUserTags = (
   userId: number
-) => Promise<ICommonApiInterface<Omit<IStatus, 'token'> & IData<IBlogTag[]>>>;
+) => Promise<ICommonApiInterface<Omit<IStatus, "token"> & IData<IBlogTag[]>>>;
 
 export type TAddBlog = (
   userId: number,
   blogContent: IBlogContent
+) => Promise<ICommonApiInterface<Omit<IStatus, "token">>>;
+
+export type TModifyBlog = (
+  blogId: number,
+  blogName: string,
+  blogContent: string,
+  tagsId: TNewTags[],
+  userId: number
 ) => Promise<ICommonApiInterface<Omit<IStatus, 'token'>>>;
 
 export type TGetBlogDetail = (
@@ -173,6 +181,8 @@ export interface IUploadResponse {
   status: boolean;
 }
 
+export type TUploadResponse = Omit<IStatus, "token"> & IData<IUploadResponse>;
+
 export type TAddNewFile = (
   filename: string,
   fileBrief: string,
@@ -185,7 +195,9 @@ export type TGetFileList = (
   pageNumber: number,
   userId?: number
 ) => Promise<
-  ICommonApiInterface<Omit<IStatus, 'token'> & IData<TFileListParams[]>>
+  ICommonApiInterface<Omit<IStatus, "token"> & IData<TFileListParams[]>>
 >;
 
-export type TAddDownloadNum = (fileId: number) => Promise<ICommonApiInterface<TReturnData<{}>>>
+export type TAddDownloadNum = (
+  fileId: number
+) => Promise<ICommonApiInterface<TReturnData<{}>>>;

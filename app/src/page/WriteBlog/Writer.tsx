@@ -13,7 +13,7 @@ const Writer: React.FC<Props> = props => {
   const { myRef, defaultValue } = props;
 
   const [content, setContent] = useState<any>(
-    BraftEritor.createEditorState(null)
+    BraftEritor.createEditorState(defaultValue || "")
   );
 
   const handleChange = (newState: any) => {
@@ -85,12 +85,11 @@ const Writer: React.FC<Props> = props => {
         value={content}
         onChange={handleChange}
         media={{ uploadFn: mediaUpload }}
-        {...(defaultValue ? { defaultValue } : {})}
       ></BraftEritor>
     </div>
   );
 };
 
-export const RefWriter = React.forwardRef<IWriterRefExpose>((props, ref) => (
+export const RefWriter = React.forwardRef<IWriterRefExpose, {defaultValue?: string}>((props, ref) => (
   <Writer {...props} myRef={ref}></Writer>
 ));
