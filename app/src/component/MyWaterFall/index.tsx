@@ -1,7 +1,16 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import styles from './style.module.scss';
-import { reduce, debounce } from 'lodash';
-import cx from 'classnames';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useImperativeHandle,
+  forwardRef,
+  PropsWithChildren
+} from "react";
+import styles from "./style.module.scss";
+import { reduce, debounce } from "lodash";
+import cx from "classnames";
+import { IWeekPickerProps } from "zent";
 
 export interface IWaterfallProps {
   handleLoading?: (
@@ -10,8 +19,13 @@ export interface IWaterfallProps {
     reject?: (value: any) => void
   ) => void;
   className?: string;
-  scrollType?: 'global' | 'local';
+  scrollType?: "global" | "local";
   initPage?: number;
+  myRef?: React.Ref<IWaterfallRef>;
+}
+
+export interface IWaterfallRef {
+  resetPos: () => void;
 }
 
 const MyWaterfall: React.FC<IWaterfallProps> = props => {
@@ -19,17 +33,26 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
     children,
     className: wrapClass,
     handleLoading,
-    scrollType = 'global',
+    scrollType = "global",
     initPage = 0,
+    myRef,
     ...res
   } = props;
+
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<number>(initPage);
   const [contentHeight, setContentHeight] = useState<number>(0);
   let [lastPageOffset, setLastHeight] = useState<number>(0);
   const [isLoading, setLoading] = useState<boolean>(false);
 
-  const [notes, setNotes] = useState<string>('载入中.....');
+  const [notes, setNotes] = useState<string>("载入中.....");
+
+  useImperativeHandle(myRef, () => ({
+    resetPos: () => {
+      console.log(12312312)
+      setPos(0);
+    }
+  }));
 
   useEffect(() => {
     const { current } = wrapperRef;
@@ -43,6 +66,7 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
       0
     );
     setContentHeight(height);
+    console.log(pos);
   }, [pos]);
 
   // 监听整个页面scroll方法
@@ -51,11 +75,10 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
       const { current } = wrapperRef;
       const { offsetHeight } = current as HTMLDivElement;
       const { innerHeight, pageYOffset } = window;
-  
-      console.log(pageYOffset, lastPageOffset)
+
       const isDown = pageYOffset - lastPageOffset > 0;
       setLastHeight(pageYOffset);
-  
+
       if (scrollTop + innerHeight >= offsetHeight && isDown) {
         new Promise<boolean>((resolve, reject) => {
           setLoading(true);
@@ -69,17 +92,14 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
             setNotes(data);
             setLoading(true);
           })
-          .finally(() => {
-            console.log('set false');
-          });
+          .finally(() => {});
       }
     } catch (error) {
-      console.log(error.msg)
+      console.log(error.msg);
     }
-
   };
 
-  const debounced = debounce(_handleScroll, 500);
+  const debounced = debounce(_handleScroll, 200);
   const handleScroll = useCallback(
     (event: Event) => {
       const height = document.documentElement.scrollTop;
@@ -89,9 +109,9 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
   );
 
   useEffect(() => {
-    scrollType === 'global' && window.addEventListener('scroll', handleScroll);
+    scrollType === "global" && window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [pos, lastPageOffset]);
 
@@ -100,16 +120,16 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
       ref={wrapperRef}
       className={cx({
         [styles.wrapper]: true,
-        [wrapClass ? wrapClass : '']: true
+        [wrapClass ? wrapClass : ""]: true
       })}
       //@ts-ignore
-      onScroll={scrollType === 'local' ? handleScroll : () => {}}
+      onScroll={scrollType === "local" ? handleScroll : () => {}}
       {...res}
     >
       {children}
       <div
         className={styles.bottomTips}
-        style={{ display: isLoading ? 'block' : 'none' }}
+        style={{ display: isLoading ? "block" : "none" }}
       >
         {notes}
       </div>
@@ -117,4 +137,15 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
   );
 };
 
-export { MyWaterfall };
+const WaterfallRef = React.forwardRef<IWaterfallRef, PropsWithChildren<IWaterfallProps>>(
+  (props, ref) => {
+    const { children, ...res } = props;
+    return (
+      <MyWaterfall {...res} myRef={ref}>
+        {children}
+      </MyWaterfall>
+    );
+  }
+);
+
+export { MyWaterfall, WaterfallRef };

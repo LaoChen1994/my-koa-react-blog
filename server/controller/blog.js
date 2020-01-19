@@ -139,8 +139,8 @@ module.exports = {
     } order by blogId desc limit ${pageNumber * pageSize},${(pageNumber + 1) *
       pageSize}`;
 
-    const countSql = `select Count(*) as totalNumber from KOA_BLOG_CONTENT where authorId=${
-      userId ? userId : -1
+    const countSql = `select COUNT(*) as totalNumber from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId  ${
+      userId ? "and userId=" + userId : ""
     }`;
     let [_, count] = await to(query(countSql));
 
@@ -225,7 +225,6 @@ module.exports = {
         )
       ];
       console.log(newTagsData);
-
 
       const [err, data] = await to(
         handler.update(

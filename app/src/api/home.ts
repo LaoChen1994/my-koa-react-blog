@@ -1,6 +1,6 @@
-import axios from 'axios';
-import { ApiHost } from '../constant';
-import { TValidateUser, TGetUndoList } from './interface';
+import axios from "axios";
+import { ApiHost } from "../constant";
+import { TValidateUser, TGetUndoList, TGetSearchKey } from "./interface";
 
 const URL = `${ApiHost}/home`;
 
@@ -12,3 +12,17 @@ export const getUndoList: TGetUndoList = userId =>
     }
   });
 
+export const getSearchKey: TGetSearchKey = (
+  keyword,
+  pageSize = 5,
+  pageNumber = 1,
+  userId
+) =>
+  axios.get(`${URL}/getSearchKey`, {
+    params: {
+      keyword,
+      pageSize,
+      pageNumber,
+      userId
+    }
+  });
