@@ -17,8 +17,9 @@ export const getSearchKey: TGetSearchKey = (
   pageSize = 5,
   pageNumber = 1,
   userId
-) =>
-  axios.get(`${URL}/getSearchKey`, {
+) =>{
+  console.log('GetSearchKey')
+  return   axios.get(`${URL}/getSearchKey`, {
     params: {
       keyword,
       pageSize,
@@ -26,3 +27,5 @@ export const getSearchKey: TGetSearchKey = (
       userId
     }
   });
+}
+

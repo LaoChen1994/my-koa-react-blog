@@ -23,10 +23,12 @@ export const addBlog: TAddBlog = (userId, blogContent) =>
     blogContent
   });
 
-export const getBlogList: TGetBlogList = (pageSize, pageNumber, userId) =>
-  axios.get(`${URL}/getBlogList`, {
+export const getBlogList: TGetBlogList = (pageSize, pageNumber, userId) => {
+  console.log("getBlogList");
+  return axios.get(`${URL}/getBlogList`, {
     params: { pageSize, pageNumber, userId }
   });
+};
 
 export const getBlogDetail: TGetBlogDetail = blogId =>
   axios.get(`${URL}/getBlogDetail`, { params: { blogId } });

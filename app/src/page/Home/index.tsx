@@ -21,6 +21,7 @@ import {
   WaterfallRef
 } from "../../component/MyWaterFall";
 import { SearchInput } from "../../component/SearchInput";
+import { usePrevious } from "../../hooks/usePrevious";
 
 interface Props {}
 
@@ -33,6 +34,7 @@ const Home: React.FC<Props> = () => {
   const [blogList, setBlogList] = useState<TBlogBrief[]>([]);
   const [undoList, setUndoList] = useState<ITodoInfo[]>([]);
   const [isSearch, setSearch] = useState<boolean>(false);
+  const prevState = usePrevious<boolean>(isSearch);
   const [lastValue, setLastValue] = useState<string>("");
 
   const [active, setActive] = useState<string | string[]>("map-0");
@@ -43,7 +45,7 @@ const Home: React.FC<Props> = () => {
     if (data) {
       const { blogList } = data.data;
       setBlogList(blogList);
-      setSearch(true);
+      isSearch && setSearch(false);
     }
   }
 
@@ -72,12 +74,13 @@ const Home: React.FC<Props> = () => {
 
   useEffect(() => {
     const { current } = waterRef;
-    if (current) {
-      console.log(123)
+    console.log("prev=", prevState);
+    console.log("curr=", isSearch);
+    if (current && prevState !== isSearch) {
       const { resetPos } = current;
       resetPos();
     }
-  }, [isSearch, waterRef]);
+  }, [isSearch, waterRef, prevState]);
 
   const linkTodoList = () => {
     history.push("/todoList");
@@ -99,7 +102,7 @@ const Home: React.FC<Props> = () => {
     const { data } = await getSearchKey(searchValue);
     const { blogList } = data.data;
     setLastValue(searchValue);
-    setSearch(true);
+    !isSearch && setSearch(true);
     setBlogList(blogList);
   };
 
@@ -165,7 +168,7 @@ const Home: React.FC<Props> = () => {
     async (page, resolve, reject) => {
       if (resolve) {
         const { data } = isSearch
-          ? await getSearchKey(lastValue, pageSize, page, state.userId)
+          ? await getSearchKey(lastValue, pageSize, page + 1, state.userId)
           : await getBlogList(pageSize, page);
         const { data: _data } = data;
         const { blogList: _bl } = _data;

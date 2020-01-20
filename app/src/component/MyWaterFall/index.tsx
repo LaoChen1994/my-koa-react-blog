@@ -49,7 +49,6 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
 
   useImperativeHandle(myRef, () => ({
     resetPos: () => {
-      console.log(12312312)
       setPos(0);
     }
   }));
