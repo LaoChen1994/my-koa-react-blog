@@ -74,13 +74,11 @@ const Home: React.FC<Props> = () => {
 
   useEffect(() => {
     const { current } = waterRef;
-    console.log("prev=", prevState);
-    console.log("curr=", isSearch);
     if (current && prevState !== isSearch) {
       const { resetPos } = current;
       resetPos();
     }
-  }, [isSearch, waterRef, prevState]);
+  }, [isSearch, prevState]);
 
   const linkTodoList = () => {
     history.push("/todoList");

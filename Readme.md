@@ -1369,3 +1369,199 @@ export default function App() {
 ~~~
 
 ![](./img/Selection_009.png)
+
+#### 16. useEffect中的坑以及利用useRef记录之前的状态
+
+##### 1. 场景描述
+
+用法在使用useEffect这个hooks的时候，我们通过会通过给他增加一个依赖项，来完成当某个或某些依赖发生改变的时候，完成一些副作用的操作，其正常用法如下:
+
+~~~react
+import React, { useEffect, useState } from "react";
+import "./styles.css";
+
+const Profile = () => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    console.log("Number is added!");
+  }, [count]);
+    
+  return (
+    <>
+      <p>Current weight: {count}</p>
+      <button onClick={() => setCount(count+1)}>+1</button>
+    </>
+  );
+};
+
+export default Profile;
+
+~~~
+
+**但是，当应用场景逐渐复杂之后，我们发现这么两个问题**：
+
++ 当依赖项为引用类型的变量时(数组)，不管依赖向是否变化，useEffect都会重新执行
++ 依赖项中，有多个变量时，一个变动，整个useEffect就会重新执行
+
+**问题一分析:**
+
+~~~javascript
+import React, { useEffect, useRef } from "react";
+import "./styles.css";
+
+const Profile = () => {
+  const [user, setUser] = React.useState({ name: "Alex", weight: 40 });
+
+  React.useEffect(() => {
+      console.log("You need to do exercise!");
+  }, [user]);
+
+  const gainWeight = () => {
+    const newWeight = Math.random() >= 0.5 ? user.weight : user.weight + 1;
+    setUser(user 用法=> ({ ...user, weight: newWeight }));
+  };
+
+  return (
+    <>
+      <p>Current weight: {user.weight}</p>
+      <button onClick={gainWeight}>Eat burger</button>
+    </>
+  );
+};
+用法
+export default Profile;
+~~~
+
+这里可以发现发现，只要点击按钮，无论数字是否增加，都会调用useEffect中的函数，其根本原因是***useEffect其本身是通过===来判定元素是否相同的***，而在javascrfipt中:
+
+~~~javascript
+[] === [] // false
+{} === {} // false
+~~~
+
+因此**如果是引用类型，不管其中的某个值是否发生变化，都会引用该useEffect内的方法**。
+
+**问题二分析:**
+
+~~~react
+import React, { useEffect, useState } from "react";
+import "./styles.css";
+
+const Profile = () => {
+  const [count, setCount] = useState(0);
+  const [simulate, setSimulate] = useState([]);
+
+  useEffect(() => {
+    console.log("Number is added!");
+  }, [count, simulate]);
+
+  const addList = () => {
+    setSimulate(sim => [...sim, Math.random().toFixed(2)]);
+  };
+
+  const addNum = () => {
+    setCount(Math.random() > 0.5 ? count + 1 : count);
+  };
+
+  return (
+    <>
+      <p>Current weight: {count}</p>
+      <button onClick={addList}>增加列表</button>
+      <button onClick={addNum}>数字 + 1</button>
+    </>
+  );
+};
+
+export default Profile;
+~~~
+
+当simulate变化的时候，确实会调用打印日志，但是我们可能希望只有在number增加的情况下才能打印(当然这里可以只把count作为依赖项)，但是某些场景下，count和simulate是耦合的，没办法分开的。这里讨论的是这种耦合场景下的使用情况。因此，为了解决这个问题，很多时候需要知道更新之前状态时的count的值，但是显然在useEffect中我们通过该钩子函数，无法获取之前的值。
+
+##### 2. 解决方法
+
+**针对问题一：改变依赖项**
+
+例如： 在这里我们只想监控weight的变化，可以将依赖项改为 user.weight
+
+~~~react
+import React, { useEffect, useRef } from "react";
+import "./styles.css";
+
+const Profile = () => {
+  const [user, setUser] = React.useState({ name: "Alex", weight: 40 });
+  const prevUser = usePrevious(user);
+
+  React.useEffect(() => {
+     console.log("You need to do exercise!");
+  }, [user.weight]);
+
+  const gainWeight = () => {
+    const newWeight = Math.random() >= 0.5 ? user.weight : user.weight + 1;
+    setUser(user => ({ ...user, weight: newWeight }));
+  };
+
+  return (
+    <>
+      <p>Current weight: {user.weight}</p>
+      <button onClick={gainWeight}>Eat burger</button>
+      <Test />
+    </>
+  );
+};
+
+export default Profile;
+
+~~~
+
+**针对问题一和二:**获取之前的状态，然后比较之后进行更新
+
+因此问题就是，如何在函数式组件中获取之前的state,参考了各种文章之后，得到结论，利用useRef的功能，其本身是通过内部闭包来保存赋予的数据的值，能够记忆上一次的赋予的值
+
+**一个usePrevious的例子**
+
+~~~javascript
+import React, { useEffect, useRef } from "react";
+import Test from "./Test";
+import "./styles.css";
+
+const Profile = () => {
+  const [user, setUser] = React.useState({ name: "Alex", weight: 40 });
+  const prevUser = usePrevious(user);
+
+  React.useEffect(() => {
+    prevUser &&
+      user.weight > prevUser.weight &&
+      console.log("You need to do exercise!");
+  }, [user]);
+
+  const gainWeight = () => {
+    const newWeight = Math.random() >= 0.5 ? user.weight : user.weight + 1;
+    setUser(user => ({ ...user, weight: newWeight }));
+  };
+
+  return (
+    <>
+      <p>Current weight: {user.weight}</p>
+      <button onClick={gainWeight}>Eat burger</button>
+      <Test />
+    </>
+  );
+};
+
+export default Profile;
+
+function usePrevious(value) {
+  const ref = useRef();
+
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+
+  return ref.current;
+}
+~~~
+
+##### 3. 参考文章
+
+[Introduction to useRef Hook](https://dev.to/dinhhuyams/introduction-to-useref-hook-3m7n): 这篇文章很好的讲解了useRef和createRef以及useRef的用法！
