@@ -1,7 +1,13 @@
 @userToken = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImN5eDEiLCJ1c2VySWQiOjIzLCJFbWFpbCI6IjEyM0BxcS5jb20iLCJhdmF0YXJVcmwiOiIvaW1hZ2VzL3VzZXJJY29uLzczNzc0dW1ta3p3LmpwZyIsInBhc3N3b3JkIjoiYWJjMTIzIiwiaWF0IjoxNTc5MzQ0NTkzLCJleHAiOjE1ODAyMDg1OTN9.HGC1-tEoagzkstgu8JwA3FJ0rXRdJ3uXsEWW38WFI6I
 
-# 搜索栏模糊查询
+### 搜索栏模糊查询
 GET http://localhost:8000/api/home/getSearchKey?keyword=测试
+Accept : application/json
+Content-Type : application/json;charset=UTF-8
+Authorization: {{userToken}}
+
+### 获取评论列表
+GET http://localhost:8000/api/blog/getComments?blogId=9
 Accept : application/json
 Content-Type : application/json;charset=UTF-8
 Authorization: {{userToken}}

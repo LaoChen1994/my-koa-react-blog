@@ -65,7 +65,6 @@ const MyWaterfall: React.FC<IWaterfallProps> = props => {
       0
     );
     setContentHeight(height);
-    console.log(pos);
   }, [pos]);
 
   // 监听整个页面scroll方法

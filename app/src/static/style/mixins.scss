@@ -52,7 +52,7 @@
   }
 }
 
-@mixin splitLine($position: top, $color: #d89cf6) {
+@mixin splitLine($position: top, $color: #d89cf6, $multiple: false) {
   padding-#{$position}: 10px;
   margin-#{$position}: 10px;
   border-#{$position}: 1px dashed $color;

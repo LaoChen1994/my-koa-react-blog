@@ -319,7 +319,6 @@ function App() {
 
   const handleFocus = () => {
     const node = myRef.current;
-    console.log(node);
     node.focus();
   };
 
@@ -442,7 +441,7 @@ function App() {
 
   const handleFocus = () => {
     const node = myRef.current;
-    console.log(node);
+    (node);
     node.focus();
   };
 
@@ -1258,7 +1257,6 @@ export default function App() {
 
     const getValue = async () => {
       const data = await _getValue()
-      console.log(data);
       setValue(data);
     }
 
@@ -1295,7 +1293,6 @@ export default function App() {
 
     const getValue = async () => {
       const data = await _getValue()
-      console.log(data);
       setValue(data);
     }
 

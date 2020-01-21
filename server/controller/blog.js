@@ -224,7 +224,6 @@ module.exports = {
           (elem, index) => index + newTagsData.insertId
         )
       ];
-      console.log(newTagsData);
 
       const [err, data] = await to(
         handler.update(
@@ -239,5 +238,36 @@ module.exports = {
     }
 
     setCtxBody(true, {}, "", "添加标签失败");
+  },
+  async addComment(ctx) {
+    const { authorId, commentItem, belongId, belongText } = ctx.request.body;
+    const [err, data] = await to(
+      handler.insert(
+        "KOA_BLOG_COMMENT",
+        ["authorId", "commentItem", "belongId", "belongText"],
+        [authorId,  commentItem, belongId, belongText]
+      )
+    );
+
+    setCtxBody(err, data, ctx, "添加评论成功", "添加评论失败");
+  },
+  async queryCommentList(ctx) {
+    const { blogId, pageSize = 5, pageNumber = 1 } = ctx.query;
+    const sql = `SELECT e.*,u.userName,u.avatarUrl as totalNumber FROM KOA_BLOG_COMMENT e, KOA_BLOG_USER u where belongText=${blogId} and e.authorId=u.userId limit ${(pageNumber -
+      1) *
+      pageSize},${pageNumber * pageSize}`;
+    let [err, data] = await to(query(sql));
+
+    if (!err) {
+      data = data.map(elem => {
+        elem.commentDate = timeFormat(elem.commentDate);
+        elem.avatarUrl = elem.avatarUrl
+          ? iconv.decode(elem.avatarUrl, "UTF-8")
+          : "";
+        return elem;
+      });
+    }
+
+    setCtxBody(err, data, ctx, "列表获取成功", "列表获取失败");
   }
 };

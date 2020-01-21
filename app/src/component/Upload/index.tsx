@@ -110,7 +110,6 @@ export const UploadBtn: React.FC<Props> = props => {
 
       xhr.addEventListener("load", e => {
         const result = xhr.response;
-        console.log("result=", result);
         const { fileName, filePath } = handleUploadRes
           ? handleUploadRes(result)
           : result;
@@ -138,7 +137,6 @@ export const UploadBtn: React.FC<Props> = props => {
   };
 
   const handleLoad = (e: any) => {
-    console.log("isLoaded");
     console.log(e);
   };
 

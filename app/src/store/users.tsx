@@ -19,6 +19,7 @@ const reducer = (state: IUserState, action: UserAction) => {
         isLogin = false,
         avatarUrl = ''
       } = action.payload;
+
       return { ...state, username, userId, isLogin, avatarUrl };
 
     case 'logout':

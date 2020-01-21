@@ -30,7 +30,7 @@ export interface IUserDetail {
   userId: number;
   Email: string;
   avatarUrl: string;
-  blogNumber: number;
+  blogNumber?: number;
   userName: string;
 }
 
@@ -65,6 +65,15 @@ export interface ITodoInfo {
   todoTitle: string;
   todoId: number;
   isExpire: boolean;
+}
+
+export interface IComment {
+  commentId: number;
+  authorId: number;
+  commentItem: string;
+  commentDate: string;
+  belongId: null | number;
+  belongText: number;
 }
 
 export interface IBlogContent {
@@ -143,7 +152,9 @@ export type TGetSearchKey = (
   pageNumber?: number,
   userId?: number
 ) => Promise<
-  ICommonApiInterface<IStatus & IData<{blogList: TBlogBrief[]} & {totalNumber: number}>>
+  ICommonApiInterface<
+    IStatus & IData<{ blogList: TBlogBrief[] } & { totalNumber: number }>
+  >
 >;
 
 export type TGetBlogList = (
@@ -189,6 +200,13 @@ export interface IUploadResponse {
   status: boolean;
 }
 
+export type TAddComment = (
+  authorId: number,
+  commentItem: string,
+  belongId: number | undefined,
+  belongText: number
+) => Promise<ICommonApiInterface<IStatus>>;
+
 export type TUploadResponse = Omit<IStatus, "token"> & IData<IUploadResponse>;
 
 export type TAddNewFile = (
@@ -209,3 +227,15 @@ export type TGetFileList = (
 export type TAddDownloadNum = (
   fileId: number
 ) => Promise<ICommonApiInterface<TReturnData<{}>>>;
+
+export type TCommentType = IComment & Pick<IUserDetail, "userName" | "avatarUrl">
+
+export type TGetCommentList = (
+  blogId: number,
+  pageNumber?: number,
+  pageSize?: number
+) => Promise<
+  ICommonApiInterface<
+    IStatus & IData<TCommentType[]>
+  >
+>;
