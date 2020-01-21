@@ -1562,3 +1562,51 @@ function usePrevious(value) {
 ##### 3. 参考文章
 
 [Introduction to useRef Hook](https://dev.to/dinhhuyams/introduction-to-useref-hook-3m7n): 这篇文章很好的讲解了useRef和createRef以及useRef的用法！
+
+
+
+### 1. shadowsocks配置
+
++ 使用命令行工具shadowsocks-libev进行翻墙
+
+~~~bash
+sudo apt install shadowsocks-libev
+~~~
+
++ 设置配置文件shadowsocks.json
+
+~~~json
+// /etc/shadowsocks.json
+{
+	"server": "host ip地址",
+    "server_port": "端口号",
+    "local_adress": "本地代理地址一般为127.0.0.1",
+    "local_port": "本地代理端口号1080",
+    "password": "远端shadowsocks的登陆密码",
+    "timeout": 5000,
+    "method": "aes-256-cfb", // 校验方法
+    "fast_open": false
+}
+~~~
+
++ 运行命令实现翻墙
+
+~~~bash
+ss-local -c /etc/shadowsocks.json
+~~~
+
++ 配置系统代理
+
+![](/home/czx/Desktop/Learn/img/Selection_002.png)
+
+先配置成全局代理，然后登陆chrome，进到chrome插件商店中下载 Proxy SwitchyOmega
+
++ 配置如下
++ ![image-20200117143732095](/home/czx/.config/Typora/typora-user-images/image-20200117143732095.png)
+
+自动切换处配置为
+
+![image-20200117143751222](/home/czx/.config/Typora/typora-user-images/image-20200117143751222.png) 如果该配置在ruleList中就走shadowsocks否则就走系统代理![image-20200117143834999](/home/czx/.config/Typora/typora-user-images/image-20200117143834999.png)
+
+规则集：https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
+
