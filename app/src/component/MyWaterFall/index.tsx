@@ -4,13 +4,11 @@ import React, {
   useRef,
   useCallback,
   useImperativeHandle,
-  forwardRef,
   PropsWithChildren
 } from "react";
 import styles from "./style.module.scss";
 import { reduce, debounce } from "lodash";
 import cx from "classnames";
-import { IWeekPickerProps } from "zent";
 
 export interface IWaterfallProps {
   handleLoading?: (

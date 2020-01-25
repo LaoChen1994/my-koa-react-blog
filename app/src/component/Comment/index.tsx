@@ -1,6 +1,13 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useMemo,
+  useImperativeHandle,
+  forwardRef,
+  Ref,
+  createRef
+} from "react";
 import styles from "./style.module.scss";
-import { usePagination } from "../../hooks/usePagination";
+import { usePagination, IPaginationProps } from "../../hooks/usePagination";
 import UserInfo from "../UserInfoInline";
 import { DetailBlock } from "../UDetailBlock";
 import {
@@ -14,20 +21,28 @@ import {
   Button,
   Pagination
 } from "zent";
-import { IUserDetail, TCommentType } from "../../api/interface";
+import { IUserDetail, TCommentType, TCommentList } from "../../api/interface";
 import cx from "classnames";
+import { PaginationChangeHandler } from "zent/es/pagination/impl/BasePagination";
 
 export interface ICommentProps {
   title?: string;
-  commentList: TCommentType[];
+  commentList: TCommentList[];
   submitFunc?: (
     value: string,
     clearTable: () => void,
-    replyId?: number
+    replyId?: number,
+    cancelReply?: () => void
   ) => void;
   maxComments?: number;
   maxNumberFonts?: number;
   userInfo?: IUserDetail;
+  myRef?: Ref<ICommentRefProps>;
+  paginationChange?: (pageSize: number, current: number) => void;
+}
+
+export interface ICommentRefProps {
+  setPagination: React.Dispatch<React.SetStateAction<IPaginationProps>>;
 }
 
 export function Comment(props: ICommentProps) {
@@ -37,16 +52,57 @@ export function Comment(props: ICommentProps) {
     maxComments = 5,
     maxNumberFonts = 1000,
     userInfo,
-    submitFunc
+    submitFunc,
+    myRef,
+    paginationChange
   } = props;
-  const pageSize = 10;
   const [comVal, setComVal] = useState<string>("");
   const [replyId, setReplyId] = useState<number | undefined>(undefined);
-  const [] = usePagination({
+  const [pagination, setPagination] = usePagination({
     current: 1,
-    pageSize,
+    pageSize: maxComments,
     total: 0
-  })
+  });
+
+  const editRef = createRef<Input>();
+
+  useImperativeHandle(myRef, () => ({
+    setPagination
+  }));
+
+  const cancelReply = () => {
+    setReplyId(undefined);
+    setComVal("");
+  };
+
+  const pageChange: PaginationChangeHandler = ({ pageSize, current }) => {
+    paginationChange && paginationChange(pageSize, current);
+  };
+
+  const renderCommentReply = (comment: TCommentType) => () => {
+    const funcObj = {
+      回复: function() {
+        const $comment = document.getElementById('comment');
+        if ($comment) {
+          window.scrollTo(0, $comment.offsetTop - $comment.clientHeight);
+        }
+
+        setReplyId(comment.commentId);
+        setComVal(`@${comment.userName}:`);
+
+      }
+    };
+
+    return (
+      <div style={{ textAlign: "right" }}>
+        {Object.entries(funcObj).map(elem => (
+          <span className={styles.commentBtn} onClick={elem[1]}>
+            {elem[0]}
+          </span>
+        ))}
+      </div>
+    );
+  };
 
   const renderEdit = useMemo(() => {
     const handleChange = (e: IInputChangeEvent) => {
@@ -63,7 +119,7 @@ export function Comment(props: ICommentProps) {
     };
 
     const sendComment = async () => {
-      submitFunc && submitFunc(comVal, clearText, replyId);
+      submitFunc && submitFunc(comVal, clearText, replyId, cancelReply);
     };
 
     return (
@@ -85,7 +141,7 @@ export function Comment(props: ICommentProps) {
               )}
             </Col>
             <Col span={19}>
-              <div className={styles.commentInput}>
+              <div className={styles.commentInput} id="comment">
                 {/* 
                 //@ts-ignore */}
                 <Input
@@ -95,11 +151,17 @@ export function Comment(props: ICommentProps) {
                   className={styles.input}
                   // 这里没办法只能写死，因为组件库的class是加在外部的div上控制高度，没办法直接控制里面input的高度
                   style={{ height: 120 }}
+                  ref={editRef}
                 />
                 <div className={styles.inputBottom}>
                   <span className={styles.notes}>
                     评论字数({comVal.length}/{maxNumberFonts})
                   </span>
+                  {replyId && (
+                    <Button type="warning" onClick={cancelReply}>
+                      取消回复
+                    </Button>
+                  )}
                   <Button type="primary" outline onClick={sendComment}>
                     提交评论
                   </Button>
@@ -114,22 +176,43 @@ export function Comment(props: ICommentProps) {
 
   const renderComment = useMemo(() => {
     return commentList.map((elem, index) => (
-      <Row key={`"commment-${index}"`}>
-        <Col span={24}>
-          <div className={styles.card}>
-            <div className={styles.comment}>{elem.commentItem}</div>
-            <div className={styles.bottom}>
-              <UserInfo
-                avatarUrl={elem.avatarUrl}
-                name={elem.userName}
-                time={elem.commentDate}
-              />
+      <>
+        <Row key={`commment-${index}`}>
+          <Col span={24}>
+            <div className={styles.card}>
+              <div className={styles.comment}>{elem.commentItem}</div>
+              <div className={styles.bottom}>
+                <UserInfo
+                  avatarUrl={elem.avatarUrl}
+                  name={elem.userName}
+                  time={elem.commentDate}
+                  extraRender={renderCommentReply(elem)}
+                />
+              </div>
             </div>
-          </div>
-        </Col>
-      </Row>
+          </Col>
+        </Row>
+        {elem.subCommentList.map((x, i) => (
+          <Row key={`subComment-${i}`} justify="end">
+            <Col span={22}>
+              <div className={styles.card}>
+                <div className={styles.comment}>{x.commentItem}</div>
+                <div className={styles.bottom}>
+                  <UserInfo
+                    avatarUrl={x.avatarUrl}
+                    name={x.userName}
+                    time={x.commentDate}
+                  />
+                </div>
+              </div>
+            </Col>
+          </Row>
+        ))}
+
+        <Row key={`subcomment-${index}`}></Row>
+      </>
     ));
-  }, [commentList]);
+  }, [commentList, pagination]);
 
   return (
     <Config
@@ -146,7 +229,21 @@ export function Comment(props: ICommentProps) {
         </Row>
         {renderEdit}
         {renderComment}
+        <Row>
+          <Col span={24}>
+            <Pagination
+              current={pagination.current}
+              total={pagination.total}
+              pageSize={pagination.pageSize}
+              onChange={pageChange}
+            ></Pagination>
+          </Col>
+        </Row>
       </Grid>
     </Config>
   );
 }
+
+export const CommentWithRef = forwardRef<ICommentRefProps, ICommentProps>(
+  (props, ref) => <Comment {...props} myRef={ref}></Comment>
+);

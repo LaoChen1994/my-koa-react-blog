@@ -7,7 +7,7 @@ Content-Type : application/json;charset=UTF-8
 Authorization: {{userToken}}
 
 ### 获取评论列表
-GET http://localhost:8000/api/blog/getComments?blogId=9
+GET http://localhost:8000/api/blog/getComments?blogId=9&pageSize=5&pageNumber=2
 Accept : application/json
 Content-Type : application/json;charset=UTF-8
 Authorization: {{userToken}}

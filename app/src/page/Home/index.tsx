@@ -15,7 +15,6 @@ import { Button, Collapse, Icon } from "zent";
 import { TBlogBrief, ITodoInfo } from "../../api/interface";
 import { BlogCard } from "../../component/BlogCard";
 import {
-  MyWaterfall,
   IWaterfallProps,
   IWaterfallRef,
   WaterfallRef
@@ -38,7 +37,7 @@ const Home: React.FC<Props> = () => {
   const [lastValue, setLastValue] = useState<string>("");
 
   const [active, setActive] = useState<string | string[]>("map-0");
-  const pageSize = 5;
+  const pageSize = 10;
 
   async function initBlogList() {
     const { data } = await getBlogList(pageSize, 0);

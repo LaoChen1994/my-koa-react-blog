@@ -245,7 +245,7 @@ module.exports = {
       handler.insert(
         "KOA_BLOG_COMMENT",
         ["authorId", "commentItem", "belongId", "belongText"],
-        [authorId,  commentItem, belongId, belongText]
+        [authorId, commentItem, belongId, belongText]
       )
     );
 
@@ -253,21 +253,52 @@ module.exports = {
   },
   async queryCommentList(ctx) {
     const { blogId, pageSize = 5, pageNumber = 1 } = ctx.query;
-    const sql = `SELECT e.*,u.userName,u.avatarUrl as totalNumber FROM KOA_BLOG_COMMENT e, KOA_BLOG_USER u where belongText=${blogId} and e.authorId=u.userId limit ${(pageNumber -
+    // 获取独立的新评论
+    const sql = `SELECT e.*,u.userName,u.avatarUrl FROM KOA_BLOG_COMMENT e, KOA_BLOG_USER u where e.belongText=${blogId} and e.authorId=u.userId and e.belongId is NULL limit ${(pageNumber -
       1) *
       pageSize},${pageNumber * pageSize}`;
-    let [err, data] = await to(query(sql));
 
-    if (!err) {
-      data = data.map(elem => {
+    const countSql = `SELECT Count(*) as totalNumber FROM KOA_BLOG_COMMENT e, KOA_BLOG_USER u where e.belongText=${blogId} and e.authorId=u.userId and e.belongId is NULL `;
+    const [err, data] = await to(Promise.all([query(sql), query(countSql)]));
+
+    const idList = data[0].map(elem => elem.commentId);
+
+    const groupSql = `SELECT e.*,u.userName,u.avatarUrl FROM KOA_BLOG_COMMENT e, KOA_BLOG_USER u where e.belongText=${blogId} and e.authorId=u.userId ${
+      idList.length ? "and e.belongId in (" + idList.join(",") + ")" : ""
+    }`;
+
+    const [belongErr, belongData] = await to(query(groupSql));
+
+    if (!err && !belongErr) {
+      let [commentList, totalNum] = data;
+
+      const { totalNumber } = totalNum[0];
+
+      commentList = commentList.map(elem => {
         elem.commentDate = timeFormat(elem.commentDate);
         elem.avatarUrl = elem.avatarUrl
           ? iconv.decode(elem.avatarUrl, "UTF-8")
           : "";
+        elem.subCommentList = belongData
+          .filter(x => x.belongId === elem.commentId)
+          .map(c => {
+            c.avatarUrl = c.avatarUrl ? iconv.decode(c.avatarUrl, "UTF-8") : "";
+            c.commentDate = timeFormat(c.commentDate);
+            return c;
+          });
         return elem;
       });
+
+      setCtxBody(
+        err,
+        { commentList, totalNumber, pageNumber },
+        ctx,
+        "列表获取成功",
+        ""
+      );
+      return;
     }
 
-    setCtxBody(err, data, ctx, "列表获取成功", "列表获取失败");
+    setCtxBody(false, {}, ctx, "", "列表获取失败");
   }
 };

@@ -228,7 +228,10 @@ export type TAddDownloadNum = (
   fileId: number
 ) => Promise<ICommonApiInterface<TReturnData<{}>>>;
 
-export type TCommentType = IComment & Pick<IUserDetail, "userName" | "avatarUrl">
+export type TCommentType = IComment &
+  Pick<IUserDetail, "userName" | "avatarUrl">;
+
+export type TCommentList = TCommentType & { subCommentList: TCommentType[] }
 
 export type TGetCommentList = (
   blogId: number,
@@ -236,6 +239,6 @@ export type TGetCommentList = (
   pageSize?: number
 ) => Promise<
   ICommonApiInterface<
-    IStatus & IData<TCommentType[]>
+    IStatus & IData<{ commentList: TCommentList[]; totalNumber: number, pageNumber: number }>
   >
 >;

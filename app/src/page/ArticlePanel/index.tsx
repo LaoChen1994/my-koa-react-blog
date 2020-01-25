@@ -1,12 +1,26 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  useCallback,
+  useRef
+} from "react";
 import { UserContext } from "../../store/users";
 import { useRouteMatch } from "react-router-dom";
 import { getBlogDetail, addComment, getComment } from "../../api/blog";
 import styles from "./style.module.scss";
-import { FullScreenLoading, Tag } from "zent";
-import { TBlogDetailInfo, IUserDetail, TCommentType } from "../../api/interface";
+import { FullScreenLoading, Tag, Notify } from "zent";
+import {
+  TBlogDetailInfo,
+  IUserDetail,
+  TCommentList
+} from "../../api/interface";
 import { staticServer } from "../../constant";
-import { Comment, ICommentProps } from "../../component/Comment";
+import {
+  CommentWithRef,
+  ICommentProps,
+  ICommentRefProps
+} from "../../component/Comment";
 import cx from "classnames";
 import { getUserDetail } from "../../api/user";
 
@@ -17,17 +31,17 @@ export const ArticlePanel: React.FC<Props> = () => {
   const { blogId } = routerMatch.params;
   const { state } = useContext(UserContext);
   const [isLoad, setLoad] = useState<boolean>(false);
+  const commentRef = useRef<ICommentRefProps>();
   const [article, setArticle] = useState<TBlogDetailInfo>(
     {} as TBlogDetailInfo
   );
 
-  const [comment, setComment] = useState<
-    TCommentType[]
-  >([]);
-
+  const [comment, setComment] = useState<TCommentList[]>([]);
   const [userDetail, setUserDetail] = useState<IUserDetail | undefined>(
     undefined
   );
+
+  const [forceUpdate, setForceUpdate] = useState<number>(0);
 
   async function getDetail() {
     const data = await getBlogDetail(+blogId);
@@ -43,21 +57,49 @@ export const ArticlePanel: React.FC<Props> = () => {
     }
   };
 
-  const getCommentList = useCallback(async () => {
-    const { data } = await getComment(+blogId);
-    const { data: commentDetail } = data;
-    setComment(commentDetail)
-  }, [blogId]);
+  const getCommentList = useCallback(
+    async (pageSize?: number, _pageNumber?: number) => {
+      const { data } = await getComment(+blogId, _pageNumber, pageSize);
+      const { commentList, totalNumber, pageNumber } = data.data;
+      setComment(commentList);
+      const { current } = commentRef;
+
+      console.log(current);
+
+      current &&
+        (() => {
+          const { setPagination } = current;
+          setPagination(state => ({
+            ...state,
+            current: +pageNumber,
+            total: totalNumber
+          }));
+        })();
+    },
+    [blogId]
+  );
 
   const handleSubCommit: ICommentProps["submitFunc"] = async (
     value,
     clearInput,
-    replyId
+    replyId,
+    cancelReply
   ) => {
     const { data } = await addComment(state.userId, value, replyId, +blogId);
     if (data) {
-      const { status } = data;
+      const { status, msg } = data;
+
+      status &&
+        (() => {
+          clearInput();
+          Notify.success(msg);
+          setForceUpdate(forceUpdate + 1);
+          cancelReply && cancelReply();
+        })();
+
       status && clearInput();
+      status && Notify.success(msg);
+      status && setForceUpdate(forceUpdate + 1);
     }
   };
 
@@ -66,7 +108,7 @@ export const ArticlePanel: React.FC<Props> = () => {
     getUserInfo();
     getDetail();
     getCommentList();
-  }, [blogId, state.userId]);
+  }, [blogId, state.userId, forceUpdate]);
 
   return (
     <>
@@ -123,12 +165,15 @@ export const ArticlePanel: React.FC<Props> = () => {
           </div>
         </div>
         <div className={styles.comment}>
-          <Comment
+          <CommentWithRef
             commentList={comment}
             title="评论列表"
             userInfo={userDetail}
             submitFunc={handleSubCommit}
-          ></Comment>
+            // @ts-ignore
+            ref={commentRef}
+            paginationChange={getCommentList}
+          ></CommentWithRef>
         </div>
       </div>
     </>
