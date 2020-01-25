@@ -22,6 +22,27 @@
 
 - 组件库: Zent
 
+#### 开发进度
+
+| 功能         | 功能列表                                                     | 完成情况 |
+| ------------ | ------------------------------------------------------------ | -------- |
+| 代办事项     | 1. 代办事项添加<br />2. 代办事项修改<br />3. 代办事项删除<br />4. 代办事项完成<br />5. 代办事项拖动完成，拖动撤回(拖动React组件完成) | 全部完成 |
+| 博客首页     | 1. 博客列表查询<br />2. 博客列表的滑动下拉加载<br />3. 博客首页代办事项提醒<br />4. 博客首页头部信息 | 完成     |
+| 文件中心     | 1. 文件的上传<br />2. 文件的下载<br />3. 文件列表的查询      | 完成     |
+| 写博客       | 1. 添加博文标签<br />2. 博文副文本编辑<br />3. 博客的修改    | 完成     |
+| 个人博客中心 | 1. 个人博客分页查询<br />2. 个人博客的编辑查看               | 完成     |
+| 用户登陆     | /                                                            | 完成     |
+| 用户注册     | /                                                            | 完成     |
+
+##### **即将更新**
+
+1. 博文的评论系统
+2. 博文和下载的浏览量查询模块
+3. 博客和文件系统的模糊查询
+4. 博文和文件的删除
+
+**。。。。。。。。。。。。**
+
 ## 下面为开发过程中碰到的问题小结
 
 ### 踩坑指南
@@ -298,7 +319,6 @@ function App() {
 
   const handleFocus = () => {
     const node = myRef.current;
-    console.log(node);
     node.focus();
   };
 
@@ -421,7 +441,7 @@ function App() {
 
   const handleFocus = () => {
     const node = myRef.current;
-    console.log(node);
+    (node);
     node.focus();
   };
 
@@ -792,7 +812,7 @@ export function ErrorInput() {
 ~~~
 
 *上述代码看上去没啥问题，但是我们实际在输入框中改变Input的值的时候会出现以下报错*
-![](/home/cyx/Desktop/Learning/ReactBlog/img/选区_149.png)
+![](./img/选区_149.png)
 
 这里存在的问题是，因为event事件是同步的，而通过debounce之后，会将多次的事件合并为一次，进行执行，因此该event性质会被改变不再是同步传过来的变量了，因此会有该警告
 
@@ -877,7 +897,7 @@ export default Search;
 
 ###### 1. 简单例子效果
 
-![](/home/cyx/Desktop/Learning/ReactBlog/img/Peek 2020-01-13 10-17.gif)
+![](./img/Peek 2020-01-13 10-17.gif)
 
 ###### 2. SwitchHeader组件的封装
 
@@ -1022,7 +1042,7 @@ render(<App />, rootElement);
 
 ###### 0.一个简单计数器的效果
 
-![](/home/cyx/Desktop/Learning/ReactBlog/img/Peek 2020-01-13 11-29.gif)
+![](./img/Peek 2020-01-13 11-29.gif)
 
 
 
@@ -1038,7 +1058,7 @@ render(<App />, rootElement);
 
   + 在定义reducer的时候传入state的类型和最后操作完返回的state的类型一定要一致，不然typescript会报错,例如下面这个，说返回的类型是never
 
-  ![](/home/cyx/Desktop/Learning/ReactBlog/img/选区_150.png)
+  ![](./img/选区_150.png)
 
 ~~~typescript
 const initCounter: IState = { count: 0 };
@@ -1148,4 +1168,445 @@ const rootElement = document.getElementById("root");
 render(<App />, rootElement);
 
 ~~~
+
+#### 15.  React异步载入组件封装
+
+##### 1. 场景叙述
+
+今天，碰到这样一个问题，就是当表单重载修改的时候，需要根据接口返回的数据来实现表单的初始化，如果是自己封装的受控组件的话，其实很简单，直接通过value赋值，然后通过onChange做后续的改变就好了。我使用的是Zent组件库，在实际操作的时候发现这么一个问题，就是封装好的组件库中的defaultValue，他只能将第一次传入的值作为初始值，当通过异步请求得到defaultValue再改变其值的话，无法得到相应改变!
+
+##### 2. 场景模拟
+
+好吧，说了这么多可能没了解我的意思，我们来模拟一下这个场景
+
+~~~react
+// 先假设定义一个表单(抄的Zent的官网的例子)
+function Component(props) {
+  const { defaultValue } = props;
+  const form = Form.useForm(FormStrategy.View);
+  return (
+    <Form layout="horizontal" form={form}>
+      <FormInputField
+        name="name"
+        label={
+          <span>
+            用户名&nbsp;
+            <Pop trigger="hover" content="用户名用于个人账号登录" centerArrow>
+              <Icon type="error-circle-o" />
+            </Pop>
+            :
+          </span>
+        }
+        defaultValue={defaultValue || "123"}
+        validators={[
+          Validators.minLength(5, "用户名至少 5 个字"),
+          Validators.maxLength(25, "用户名最多 25 个字")
+        ]}
+        helpDesc="用户名为5-25个字"
+        required="必填"
+      />
+      <FormInputField
+        name="password"
+        type="password"
+        label="密码:"
+        helpDesc={
+          <span>
+            密码由英文字母、数字组成
+            <a href="https://youzan.com" target="_blank">
+              查看更多
+            </a>
+          </span>
+        }
+        validateOccasion={
+          Form.ValidateOccasion.Blur | Form.ValidateOccasion.Change
+        }
+        validators={[
+          Validators.pattern(/^[a-zA-Z0-9]+$/, "只允许英文字母和数字")
+        ]}
+        notice="重要提示：填写后无法修改，请谨慎设置"
+        required="必填"
+      />
+      <FormInputField
+        className="demo-form-basic-email"
+        label="E-Mail:"
+        name="email"
+        validators={[
+          Validators.required("必填"),
+          Validators.email("请输入正确的邮箱")
+        ]}
+      />
+    </Form>
+  );
+}
+~~~
+
+我想定义对用户名进行异步初始值的定义，用setTimeout模拟一个调用接口的过程 
+
+~~~react
+export default function App() {
+  const [defaultValue, setValue] = useState("");
+  const _getValue = () => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => resolve("Init123"), 500);
+    });
+  };
+
+  const loadFunc = value => () => <Component defaultValue={value} />;
+
+    useEffect(() => {
+
+    const getValue = async () => {
+      const data = await _getValue()
+      setValue(data);
+    }
+
+    getValue()    
+
+  }, [])
+
+  return (
+    <div className="App">
+      <h1>Hello CodeSandbox</h1>
+      <h2>Start editing to see some magic happen!</h2>
+      <Component defaultValue={defaultValue} />
+    </div>
+  );
+}
+~~~
+
+上述代码理论上随着defaultValue变为Init123，应该用户名的默认值会变为Init123, 然而其默认值还是123
+
+![](/home/czx/Desktop/Learn/my-koa-react-blog/img/Selection_008.png)
+
+##### 3. 原因分析
+
+主要原因是***FormInputField只在组件加载的时候将该value设置为defaultValue，因此当后续改变defaultValue并不会改变该input的value值***。要解决该问题有两个方法。
+
++ 检测当default变化时才加载组件(类似组件的懒加载)
+
+~~~react
+export default function App() {
+
+  const [defaultValue, setValue] = useState("");
+
+  useEffect(() => {
+
+    const getValue = async () => {
+      const data = await _getValue()
+      setValue(data);
+    }
+
+    getValue()    
+
+  }, [])
+
+  return (
+    <div className="App">
+      <h1>Hello CodeSandbox</h1>
+      <h2>Start editing to see some magic happen!</h2>javascript
+      {
+        defaultValue && <Component defaultValue={defaultValue} />
+      }
+    </div>
+  );
+}
+~~~
+
+这种方法确实可以解决这个问题，但是这种方法看上去不太优雅和通用，如果我们每次都需要判断一个值的存在与否来加载组件，有一些不方便，因此我们可以封装一个异步加载的组件，来完成这个工作。
+
++ 定义一个异步加载组件
+
+~~~react
+class AsyncComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      Component: null
+    };
+  }
+
+  async componentDidMount() {
+    const { asyncFunc, loadFunc } = this.props;
+
+    const data = await asyncFunc();
+    this.setState({
+      Component: loadFunc(data)
+    });
+  }
+
+  render() {
+    const { Component: MyList } = this.state;
+
+    return <div>{MyList && <MyList />}</div>;
+  }
+}
+~~~
+
++ 使用该组件的方法
+
+~~~react
+export default function App() {
+
+  const _getValue = () => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => resolve("Init123"), 500);
+    });
+  };
+
+  const loadFunc = value => () => <Component defaultValue={value} />;
+
+
+  return (
+    <div className="App">
+      <h1>Hello CodeSandbox</h1>
+      <AsyncComponent asyncFunc={_getValue} loadFunc={loadFunc} />
+    </div>
+  );
+}
+~~~
+
+![](./img/Selection_009.png)
+
+#### 16. useEffect中的坑以及利用useRef记录之前的状态
+
+##### 1. 场景描述
+
+用法在使用useEffect这个hooks的时候，我们通过会通过给他增加一个依赖项，来完成当某个或某些依赖发生改变的时候，完成一些副作用的操作，其正常用法如下:
+
+~~~react
+import React, { useEffect, useState } from "react";
+import "./styles.css";
+
+const Profile = () => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    console.log("Number is added!");
+  }, [count]);
+    
+  return (
+    <>
+      <p>Current weight: {count}</p>
+      <button onClick={() => setCount(count+1)}>+1</button>
+    </>
+  );
+};
+
+export default Profile;
+
+~~~
+
+**但是，当应用场景逐渐复杂之后，我们发现这么两个问题**：
+
++ 当依赖项为引用类型的变量时(数组)，不管依赖向是否变化，useEffect都会重新执行
++ 依赖项中，有多个变量时，一个变动，整个useEffect就会重新执行
+
+**问题一分析:**
+
+~~~javascript
+import React, { useEffect, useRef } from "react";
+import "./styles.css";
+
+const Profile = () => {
+  const [user, setUser] = React.useState({ name: "Alex", weight: 40 });
+
+  React.useEffect(() => {
+      console.log("You need to do exercise!");
+  }, [user]);
+
+  const gainWeight = () => {
+    const newWeight = Math.random() >= 0.5 ? user.weight : user.weight + 1;
+    setUser(user 用法=> ({ ...user, weight: newWeight }));
+  };
+
+  return (
+    <>
+      <p>Current weight: {user.weight}</p>
+      <button onClick={gainWeight}>Eat burger</button>
+    </>
+  );
+};
+用法
+export default Profile;
+~~~
+
+这里可以发现发现，只要点击按钮，无论数字是否增加，都会调用useEffect中的函数，其根本原因是***useEffect其本身是通过===来判定元素是否相同的***，而在javascrfipt中:
+
+~~~javascript
+[] === [] // false
+{} === {} // false
+~~~
+
+因此**如果是引用类型，不管其中的某个值是否发生变化，都会引用该useEffect内的方法**。
+
+**问题二分析:**
+
+~~~react
+import React, { useEffect, useState } from "react";
+import "./styles.css";
+
+const Profile = () => {
+  const [count, setCount] = useState(0);
+  const [simulate, setSimulate] = useState([]);
+
+  useEffect(() => {
+    console.log("Number is added!");
+  }, [count, simulate]);
+
+  const addList = () => {
+    setSimulate(sim => [...sim, Math.random().toFixed(2)]);
+  };
+
+  const addNum = () => {
+    setCount(Math.random() > 0.5 ? count + 1 : count);
+  };
+
+  return (
+    <>
+      <p>Current weight: {count}</p>
+      <button onClick={addList}>增加列表</button>
+      <button onClick={addNum}>数字 + 1</button>
+    </>
+  );
+};
+
+export default Profile;
+~~~
+
+当simulate变化的时候，确实会调用打印日志，但是我们可能希望只有在number增加的情况下才能打印(当然这里可以只把count作为依赖项)，但是某些场景下，count和simulate是耦合的，没办法分开的。这里讨论的是这种耦合场景下的使用情况。因此，为了解决这个问题，很多时候需要知道更新之前状态时的count的值，但是显然在useEffect中我们通过该钩子函数，无法获取之前的值。
+
+##### 2. 解决方法
+
+**针对问题一：改变依赖项**
+
+例如： 在这里我们只想监控weight的变化，可以将依赖项改为 user.weight
+
+~~~react
+import React, { useEffect, useRef } from "react";
+import "./styles.css";
+
+const Profile = () => {
+  const [user, setUser] = React.useState({ name: "Alex", weight: 40 });
+  const prevUser = usePrevious(user);
+
+  React.useEffect(() => {
+     console.log("You need to do exercise!");
+  }, [user.weight]);
+
+  const gainWeight = () => {
+    const newWeight = Math.random() >= 0.5 ? user.weight : user.weight + 1;
+    setUser(user => ({ ...user, weight: newWeight }));
+  };
+
+  return (
+    <>
+      <p>Current weight: {user.weight}</p>
+      <button onClick={gainWeight}>Eat burger</button>
+      <Test />
+    </>
+  );
+};
+
+export default Profile;
+
+~~~
+
+**针对问题一和二:**获取之前的状态，然后比较之后进行更新
+
+因此问题就是，如何在函数式组件中获取之前的state,参考了各种文章之后，得到结论，利用useRef的功能，其本身是通过内部闭包来保存赋予的数据的值，能够记忆上一次的赋予的值
+
+**一个usePrevious的例子**
+
+~~~javascript
+import React, { useEffect, useRef } from "react";
+import Test from "./Test";
+import "./styles.css";
+
+const Profile = () => {
+  const [user, setUser] = React.useState({ name: "Alex", weight: 40 });
+  const prevUser = usePrevious(user);
+
+  React.useEffect(() => {
+    prevUser &&
+      user.weight > prevUser.weight &&
+      console.log("You need to do exercise!");
+  }, [user]);
+
+  const gainWeight = () => {
+    const newWeight = Math.random() >= 0.5 ? user.weight : user.weight + 1;
+    setUser(user => ({ ...user, weight: newWeight }));
+  };
+
+  return (
+    <>
+      <p>Current weight: {user.weight}</p>
+      <button onClick={gainWeight}>Eat burger</button>
+      <Test />
+    </>
+  );
+};
+
+export default Profile;
+
+function usePrevious(value) {
+  const ref = useRef();
+
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+
+  return ref.current;
+}
+~~~
+
+##### 3. 参考文章
+
+[Introduction to useRef Hook](https://dev.to/dinhhuyams/introduction-to-useref-hook-3m7n): 这篇文章很好的讲解了useRef和createRef以及useRef的用法！
+
+
+
+### 1. shadowsocks配置
+
++ 使用命令行工具shadowsocks-libev进行翻墙
+
+~~~bash
+sudo apt install shadowsocks-libev
+~~~
+
++ 设置配置文件shadowsocks.json
+
+~~~json
+// /etc/shadowsocks.json
+{
+	"server": "host ip地址",
+    "server_port": "端口号",
+    "local_adress": "本地代理地址一般为127.0.0.1",
+    "local_port": "本地代理端口号1080",
+    "password": "远端shadowsocks的登陆密码",
+    "timeout": 5000,
+    "method": "aes-256-cfb", // 校验方法
+    "fast_open": false
+}
+~~~
+
++ 运行命令实现翻墙
+
+~~~bash
+ss-local -c /etc/shadowsocks.json
+~~~
+
++ 配置系统代理
+
+![](/home/czx/Desktop/Learn/img/Selection_002.png)
+
+先配置成全局代理，然后登陆chrome，进到chrome插件商店中下载 Proxy SwitchyOmega
+
++ 配置如下
++ ![image-20200117143732095](/home/czx/.config/Typora/typora-user-images/image-20200117143732095.png)
+
+自动切换处配置为
+
+![image-20200117143751222](/home/czx/.config/Typora/typora-user-images/image-20200117143751222.png) 如果该配置在ruleList中就走shadowsocks否则就走系统代理![image-20200117143834999](/home/czx/.config/Typora/typora-user-images/image-20200117143834999.png)
+
+规则集：https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
 

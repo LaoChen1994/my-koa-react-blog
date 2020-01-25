@@ -1,5 +1,11 @@
-import React, { useEffect, useContext, useState, useCallback } from "react";
-import { getHome, getUndoList } from "../../api/home";
+import React, {
+  useEffect,
+  useContext,
+  useState,
+  useCallback,
+  createRef
+} from "react";
+import { getHome, getUndoList, getSearchKey } from "../../api/home";
 import { getBlogList } from "../../api/blog";
 import { UserContext } from "../../store/users";
 import Welcome from "./Welcome";
@@ -8,7 +14,13 @@ import { useHistory } from "react-router-dom";
 import { Button, Collapse, Icon } from "zent";
 import { TBlogBrief, ITodoInfo } from "../../api/interface";
 import { BlogCard } from "../../component/BlogCard";
-import { MyWaterfall, IWaterfallProps } from "../../component/MyWaterFall";
+import {
+  IWaterfallProps,
+  IWaterfallRef,
+  WaterfallRef
+} from "../../component/MyWaterFall";
+import { SearchInput } from "../../component/SearchInput";
+import { usePrevious } from "../../hooks/usePrevious";
 
 interface Props {}
 
@@ -16,28 +28,34 @@ const Home: React.FC<Props> = () => {
   const history = useHistory();
 
   const { state } = useContext(UserContext);
+  const waterRef = createRef<IWaterfallRef>();
+
   const [blogList, setBlogList] = useState<TBlogBrief[]>([]);
   const [undoList, setUndoList] = useState<ITodoInfo[]>([]);
+  const [isSearch, setSearch] = useState<boolean>(false);
+  const prevState = usePrevious<boolean>(isSearch);
+  const [lastValue, setLastValue] = useState<string>("");
 
   const [active, setActive] = useState<string | string[]>("map-0");
-  const pageSize = 5;
+  const pageSize = 10;
+
+  async function initBlogList() {
+    const { data } = await getBlogList(pageSize, 0);
+    if (data) {
+      const { blogList } = data.data;
+      setBlogList(blogList);
+      isSearch && setSearch(false);
+    }
+  }
 
   useEffect(() => {
     async function getData() {
       await getHome();
     }
 
-    async function _getBlogList() {
-      const { data } = await getBlogList(pageSize, 0);
-      if (data) {
-        const { blogList } = data.data;
-        setBlogList(blogList);
-      }
-    }
-
     try {
       getData();
-      _getBlogList();
+      initBlogList();
     } catch (error) {
       console.log("err=", error);
     }
@@ -53,6 +71,14 @@ const Home: React.FC<Props> = () => {
     _getUndoList();
   }, [state.userId]);
 
+  useEffect(() => {
+    const { current } = waterRef;
+    if (current && prevState !== isSearch) {
+      const { resetPos } = current;
+      resetPos();
+    }
+  }, [isSearch, prevState]);
+
   const linkTodoList = () => {
     history.push("/todoList");
   };
@@ -67,6 +93,14 @@ const Home: React.FC<Props> = () => {
 
   const handleColChange = (value: string | string[]) => {
     setActive(value);
+  };
+
+  const getSearchRes = async (searchValue: string) => {
+    const { data } = await getSearchKey(searchValue);
+    const { blogList } = data.data;
+    setLastValue(searchValue);
+    !isSearch && setSearch(true);
+    setBlogList(blogList);
   };
 
   /**
@@ -130,7 +164,9 @@ const Home: React.FC<Props> = () => {
   const handleScrolLoading: IWaterfallProps["handleLoading"] = useCallback(
     async (page, resolve, reject) => {
       if (resolve) {
-        const { data } = await getBlogList(pageSize, page);
+        const { data } = isSearch
+          ? await getSearchKey(lastValue, pageSize, page + 1, state.userId)
+          : await getBlogList(pageSize, page);
         const { data: _data } = data;
         const { blogList: _bl } = _data;
 
@@ -142,7 +178,7 @@ const Home: React.FC<Props> = () => {
         }
       }
     },
-    [blogList]
+    [blogList, lastValue]
   );
 
   return (
@@ -175,17 +211,26 @@ const Home: React.FC<Props> = () => {
       </div>
 
       <div className={style.contentList}>
-        <MyWaterfall
+        <WaterfallRef
           handleLoading={handleScrolLoading}
           className={style.blogList}
+          ref={waterRef}
         >
-          <div className={style.itemTitle}>最新博客</div>
+          <div className={style.contentHeader}>
+            <div className={style.itemTitle}>最新博客</div>
+            <SearchInput
+              placeholder="请输入博文关键字"
+              fetchData={getSearchRes}
+              fetchDataInEmpty={initBlogList}
+            ></SearchInput>
+          </div>
+
           <div className={style.blogBody}>
             {blogList.map((elem, index) => (
               <BlogCard data={elem} key={`blog-card-${index}`}></BlogCard>
             ))}
           </div>
-        </MyWaterfall>
+        </WaterfallRef>
         <div className={style.left}>
           <div className={style.todoList}>
             <div className={style.itemTitle}>代办事项</div>

@@ -44,7 +44,6 @@ export const FileCenter: React.FC<Props> = () => {
     // @ts-ignore
     const value = form.getValue() as IFormValue;
     const { fileBrief, file, name } = value;
-    console.log(value);
     const { filePath } = file.files[0];
 
     const { data } = await addNewFile(name, fileBrief, state.userId, filePath);

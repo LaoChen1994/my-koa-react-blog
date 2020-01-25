@@ -21,7 +21,9 @@ export default function index(props: Props): ReactElement {
       />
       <span className={styles.author}>{name}</span>
       <span className={styles.time}>发布日期: {time}</span>
-      <div className={styles.extraBody}></div>
+      <div className={styles.extraBody}>
+        {extraRender && extraRender()}
+      </div>
     </div>
   );
 }

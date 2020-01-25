@@ -47,9 +47,9 @@
     line-height: 20px;
   }
 
-  img {
-    margin: 10px auto;
-    width: 80%;
+  & > img {
+    max-height: 200px;
+    width: auto;
   }
 }
 
@@ -59,4 +59,14 @@
 
 .topSplit {
   @include splitLine(top);
+}
+
+.content {
+  min-height: 200px;
+
+
+}
+
+.comment {
+  margin-top: 20px;
 }

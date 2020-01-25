@@ -1,0 +1,26 @@
+.wrapper {
+  padding: 5px 10px 0 0;
+  display: inline-block;
+  border-bottom:2px solid rgba($color: #999, $alpha: 0.3);
+}
+
+.search {
+  border-style: none !important;
+
+  & > input {
+    width: 200px;
+    height: 20px;
+    transition: width 1s ease;
+
+    &:focus {
+      width: 250px;
+      outline: none!important;
+      box-shadow: none!important;
+    }
+  }
+}
+
+.inline {
+    display: inline-block;
+    vertical-align: middle;
+}

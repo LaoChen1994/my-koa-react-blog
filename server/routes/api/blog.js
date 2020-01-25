@@ -8,5 +8,7 @@ router.get("/getBlogList", BlogController.getBlogList);
 router.get("/getBlogDetail", BlogController.getBlogDetail);
 router.post("/blogImageUpload", BlogController.blogMediaUpload);
 router.post("/modifyBlog", BlogController.blogModify);
+router.post('/addComment', BlogController.addComment);
+router.get('/getComments', BlogController.queryCommentList);
 
 module.exports = router;

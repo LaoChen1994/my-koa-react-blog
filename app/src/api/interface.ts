@@ -1,6 +1,5 @@
 import { IUserState, IBlogTag } from "../interface";
 import { TNewTags } from "../component/TagsSelection/CloseTags";
-import { string } from "prop-types";
 
 export interface ICommonApiInterface<T> {
   data: T;
@@ -31,7 +30,7 @@ export interface IUserDetail {
   userId: number;
   Email: string;
   avatarUrl: string;
-  blogNumber: number;
+  blogNumber?: number;
   userName: string;
 }
 
@@ -66,6 +65,15 @@ export interface ITodoInfo {
   todoTitle: string;
   todoId: number;
   isExpire: boolean;
+}
+
+export interface IComment {
+  commentId: number;
+  authorId: number;
+  commentItem: string;
+  commentDate: string;
+  belongId: null | number;
+  belongText: number;
 }
 
 export interface IBlogContent {
@@ -138,6 +146,17 @@ export type TGetUndoList = (
   userId: number
 ) => Promise<ICommonApiInterface<IStatus & IData<{ undoList: ITodoInfo[] }>>>;
 
+export type TGetSearchKey = (
+  keyword: string,
+  pageSize?: number,
+  pageNumber?: number,
+  userId?: number
+) => Promise<
+  ICommonApiInterface<
+    IStatus & IData<{ blogList: TBlogBrief[] } & { totalNumber: number }>
+  >
+>;
+
 export type TGetBlogList = (
   pageSize: number,
   currentPage: number,
@@ -168,7 +187,7 @@ export type TModifyBlog = (
   blogContent: string,
   tagsId: TNewTags[],
   userId: number
-) => Promise<ICommonApiInterface<Omit<IStatus, 'token'>>>;
+) => Promise<ICommonApiInterface<Omit<IStatus, "token">>>;
 
 export type TGetBlogDetail = (
   blogId: number
@@ -180,6 +199,13 @@ export interface IUploadResponse {
   msg: string;
   status: boolean;
 }
+
+export type TAddComment = (
+  authorId: number,
+  commentItem: string,
+  belongId: number | undefined,
+  belongText: number
+) => Promise<ICommonApiInterface<IStatus>>;
 
 export type TUploadResponse = Omit<IStatus, "token"> & IData<IUploadResponse>;
 
@@ -201,3 +227,18 @@ export type TGetFileList = (
 export type TAddDownloadNum = (
   fileId: number
 ) => Promise<ICommonApiInterface<TReturnData<{}>>>;
+
+export type TCommentType = IComment &
+  Pick<IUserDetail, "userName" | "avatarUrl">;
+
+export type TCommentList = TCommentType & { subCommentList: TCommentType[] }
+
+export type TGetCommentList = (
+  blogId: number,
+  pageNumber?: number,
+  pageSize?: number
+) => Promise<
+  ICommonApiInterface<
+    IStatus & IData<{ commentList: TCommentList[]; totalNumber: number, pageNumber: number }>
+  >
+>;

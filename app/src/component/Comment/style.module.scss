@@ -1,0 +1,62 @@
+@import '../../static/style/mixins.scss';
+
+
+.title {
+    @extend .subtitle;
+}
+
+.wrapper {
+    align-items: stretch!important;
+}
+
+.commentInput {
+    display: flex;
+    flex-direction: column;
+
+    height: 100%;
+}
+
+.input {
+    flex: 1;
+    height: auto;
+}
+
+.inputBottom {
+    flex: 0  30px;
+    text-align: right;
+    margin-top: 10px;
+}
+
+.notes {
+    @extend .note_text;
+    margin-right: 20px;
+    font-size: 16px;
+    line-height: 30px;
+    float: left;
+}
+
+.wrapper {
+    height: 100%;
+}
+
+.card {
+    @include splitLine(bottom);
+}
+
+.comment {
+    @extend .normal_text;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.bottom {
+    margin-top: 10px;
+}
+
+.commentBtn {
+    @extend .note_text;
+    cursor: pointer;
+    &:hover {
+        color: #333;
+    }
+}

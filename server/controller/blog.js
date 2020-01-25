@@ -139,8 +139,8 @@ module.exports = {
     } order by blogId desc limit ${pageNumber * pageSize},${(pageNumber + 1) *
       pageSize}`;
 
-    const countSql = `select Count(*) as totalNumber from KOA_BLOG_CONTENT where authorId=${
-      userId ? userId : -1
+    const countSql = `select COUNT(*) as totalNumber from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId  ${
+      userId ? "and userId=" + userId : ""
     }`;
     let [_, count] = await to(query(countSql));
 
@@ -224,8 +224,6 @@ module.exports = {
           (elem, index) => index + newTagsData.insertId
         )
       ];
-      console.log(newTagsData);
-
 
       const [err, data] = await to(
         handler.update(
@@ -240,5 +238,67 @@ module.exports = {
     }
 
     setCtxBody(true, {}, "", "添加标签失败");
+  },
+  async addComment(ctx) {
+    const { authorId, commentItem, belongId, belongText } = ctx.request.body;
+    const [err, data] = await to(
+      handler.insert(
+        "KOA_BLOG_COMMENT",
+        ["authorId", "commentItem", "belongId", "belongText"],
+        [authorId, commentItem, belongId, belongText]
+      )
+    );
+
+    setCtxBody(err, data, ctx, "添加评论成功", "添加评论失败");
+  },
+  async queryCommentList(ctx) {
+    const { blogId, pageSize = 5, pageNumber = 1 } = ctx.query;
+    // 获取独立的新评论
+    const sql = `SELECT e.*,u.userName,u.avatarUrl FROM KOA_BLOG_COMMENT e, KOA_BLOG_USER u where e.belongText=${blogId} and e.authorId=u.userId and e.belongId is NULL limit ${(pageNumber -
+      1) *
+      pageSize},${pageNumber * pageSize}`;
+
+    const countSql = `SELECT Count(*) as totalNumber FROM KOA_BLOG_COMMENT e, KOA_BLOG_USER u where e.belongText=${blogId} and e.authorId=u.userId and e.belongId is NULL `;
+    const [err, data] = await to(Promise.all([query(sql), query(countSql)]));
+
+    const idList = data[0].map(elem => elem.commentId);
+
+    const groupSql = `SELECT e.*,u.userName,u.avatarUrl FROM KOA_BLOG_COMMENT e, KOA_BLOG_USER u where e.belongText=${blogId} and e.authorId=u.userId ${
+      idList.length ? "and e.belongId in (" + idList.join(",") + ")" : ""
+    }`;
+
+    const [belongErr, belongData] = await to(query(groupSql));
+
+    if (!err && !belongErr) {
+      let [commentList, totalNum] = data;
+
+      const { totalNumber } = totalNum[0];
+
+      commentList = commentList.map(elem => {
+        elem.commentDate = timeFormat(elem.commentDate);
+        elem.avatarUrl = elem.avatarUrl
+          ? iconv.decode(elem.avatarUrl, "UTF-8")
+          : "";
+        elem.subCommentList = belongData
+          .filter(x => x.belongId === elem.commentId)
+          .map(c => {
+            c.avatarUrl = c.avatarUrl ? iconv.decode(c.avatarUrl, "UTF-8") : "";
+            c.commentDate = timeFormat(c.commentDate);
+            return c;
+          });
+        return elem;
+      });
+
+      setCtxBody(
+        err,
+        { commentList, totalNumber, pageNumber },
+        ctx,
+        "列表获取成功",
+        ""
+      );
+      return;
+    }
+
+    setCtxBody(false, {}, ctx, "", "列表获取失败");
   }
 };
