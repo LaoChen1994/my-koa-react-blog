@@ -59,10 +59,10 @@ const tagsIsExist = async (newTags, userId) =>
     )})`;
     const data = await query(sql);
 
-    if (data.length) {
-      reject({ status: false, msg: "文章标签已经存在" });
-    } else {
+    if (!data.length) {
       resolve({ status: true, msg: "文章标签添加成功" });
+    } else {
+      reject({ status: false, msg: "文章标签已经存在" });
     }
   });
 
@@ -104,7 +104,10 @@ module.exports = {
 
     const [err, data] = await to(Promise.all([oldTagExec, newTagExec]));
 
-    if (!err) {
+    if (err) {
+      console.log(err);
+      ctx.body = genResp(false, "添加标签失败", []);
+    } else {
       const newTagRes = data[1];
       const { affectedRows = 0, insertId } = newTagRes;
 
@@ -126,9 +129,6 @@ module.exports = {
       );
 
       setCtxBody(blogErr, {}, ctx, "标签添加成功", "标签添加失败");
-    } else {
-      console.log(err);
-      ctx.body = genResp(false, "添加标签失败", []);
     }
   },
   async getBlogList(ctx) {
