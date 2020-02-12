@@ -22,7 +22,7 @@ export const MyBlogList: React.FC<Props> = () => {
   const [lastVal, setLastVal] = useState<string>("");
   const [pageNumber, setPage] = useState<number>(0);
   const [useInfo, setUserInfo] = useState<IUserDetail>({} as IUserDetail);
-  const pageSize = 5;
+  const pageSize = 10;
 
   const [pagination, setPagination] = usePagination({
     current: 1,
