@@ -52,9 +52,19 @@
 .bottom {
   @extend .note_text;
   font-size: 14px;
-  & > span {
-    margin-right: 10px;
-  }
   display: flex;
   align-items: center;
+
+  & > span {
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+}
+
+.right {
+  flex: 1;
+  & > span {
+    margin-right: 10px;
+    float: right;
+  }
 }

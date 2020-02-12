@@ -21,6 +21,7 @@
   @extend .note_text;
   display: flex;
   align-items: center;
+  color: $blue;
 }
 
 .userIcon {
@@ -63,10 +64,14 @@
 
 .content {
   min-height: 200px;
-
-
 }
 
 .comment {
   margin-top: 20px;
+}
+
+.bold {
+  font-weight: 500;
+  margin-right: 20px;
+  margin-left: 5px;
 }

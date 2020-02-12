@@ -24,6 +24,8 @@ export interface IBlogInfo {
   blogContent: string;
   authorId: number;
   tagsId: number[];
+  viewNumber: number;
+  commentNumber: 0;
 }
 
 export interface IUserDetail {
@@ -97,6 +99,8 @@ export type TAddModifyProps = Omit<ITodoInfo, "userId" | "isExpire">;
 export type TBlogDetailInfo = IBlogInfo & {
   tags: IBlogTag[];
   blogNumber: number;
+  viewNumber: number;
+  commentNumber: number;
 } & Pick<IUserState, "avatarUrl" | "username">;
 export type TFileListParams = Omit<IFileInfo, "authorId"> &
   Pick<IUserState, "userId" | "username" | "avatarUrl">;
@@ -231,7 +235,7 @@ export type TAddDownloadNum = (
 export type TCommentType = IComment &
   Pick<IUserDetail, "userName" | "avatarUrl">;
 
-export type TCommentList = TCommentType & { subCommentList: TCommentType[] }
+export type TCommentList = TCommentType & { subCommentList: TCommentType[] };
 
 export type TGetCommentList = (
   blogId: number,
@@ -239,6 +243,11 @@ export type TGetCommentList = (
   pageSize?: number
 ) => Promise<
   ICommonApiInterface<
-    IStatus & IData<{ commentList: TCommentList[]; totalNumber: number, pageNumber: number }>
+    IStatus &
+      IData<{
+        commentList: TCommentList[];
+        totalNumber: number;
+        pageNumber: number;
+      }>
   >
 >;

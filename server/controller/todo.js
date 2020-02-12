@@ -49,8 +49,6 @@ module.exports = TodoController = {
     const sql = `select * from KOA_TODO where userId=${userId}`;
     let [error, data] = await to(query(sql));
 
-    // let count = await handler.queryCount('KOA_TODO', ['*'], { userId });
-    // console.log(count[0]['COUNT(\'*\')']);
 
     if (!error) {
       data = data.map(elem => {
@@ -66,7 +64,6 @@ module.exports = TodoController = {
 
       ctx.body = genResp(true, '已获取事件列表', { data });
     } else {
-      console.log(error);
       ctx.body = genResp(false, '获取用户数据失败', {});
     }
   },

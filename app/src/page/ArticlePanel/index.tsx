@@ -41,11 +41,15 @@ export const ArticlePanel: React.FC<Props> = () => {
     undefined
   );
 
-  const [forceUpdate, setForceUpdate] = useState<number>(0);
-
   async function getDetail() {
     const data = await getBlogDetail(+blogId);
     setLoad(false);
+    // 这种写法有点垃圾
+    // 可读性贼差
+    // 但是前面接口定义都全部提出来了
+    // 好像不这样弄，之前的都白做了
+    // 有空再改把
+    // 我也很难过阿，emmmm
     setArticle(data.data.data);
   }
 
@@ -93,13 +97,9 @@ export const ArticlePanel: React.FC<Props> = () => {
         (() => {
           clearInput();
           Notify.success(msg);
-          setForceUpdate(forceUpdate + 1);
+          getCommentList();
           cancelReply && cancelReply();
         })();
-
-      status && clearInput();
-      status && Notify.success(msg);
-      status && setForceUpdate(forceUpdate + 1);
     }
   };
 
@@ -108,7 +108,7 @@ export const ArticlePanel: React.FC<Props> = () => {
     getUserInfo();
     getDetail();
     getCommentList();
-  }, [blogId, state.userId, forceUpdate]);
+  }, [blogId, state.userId]);
 
   return (
     <>
@@ -123,7 +123,17 @@ export const ArticlePanel: React.FC<Props> = () => {
             })}
             style={{ marginTop: "10px" }}
           >
-            <span className={styles.time}>{article.lastUpdateTime}</span>
+            <span className={styles.time}>
+              最后更新日期:
+              <span className={styles.bold}>{article.lastUpdateTime}</span>
+            </span>
+            <span className={styles.viewNumber}>
+              浏览量: <span className={styles.bold}>{article.viewNumber}</span>
+            </span>
+            <span className={styles.headComment}>
+              评论数:
+              <span className={styles.bold}>{article.commentNumber}</span>
+            </span>
             {article.tags &&
               article.tags.map((elem, index) => (
                 <Tag

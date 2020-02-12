@@ -1,24 +1,24 @@
-import React, { useContext, useCallback, useEffect, useState } from 'react';
-import styles from './style.module.scss';
+import React, { useContext, useCallback, useEffect, useState } from "react";
+import styles from "./style.module.scss";
 import {
   DragStore,
   DragWrapper,
   DragElement
-} from '../../component/DragComponent';
-import { Button, Dialog, Tag, Notify } from 'zent';
-import { AddTodoForm } from './AddTodoForm';
-import { CardContent } from './CardContent';
+} from "../../component/DragComponent";
+import { Button, Dialog, Tag, Notify } from "zent";
+import { AddTodoForm } from "./AddTodoForm";
+import { CardContent } from "./CardContent";
 
-import { UserContext } from '../../store/users';
+import { UserContext } from "../../store/users";
 import {
   getTodoList,
   finishItem,
   recallItem,
   clearAll,
   getCompleteList
-} from '../../api/todo';
-import { ITodoInfo } from '../../api/interface';
-import { MyCard, ICardProps, TCardSlidUp } from '../../component/MyCard';
+} from "../../api/todo";
+import { ITodoInfo } from "../../api/interface";
+import { MyCard, ICardProps, TCardSlidUp } from "../../component/MyCard";
 
 interface Props {}
 
@@ -33,47 +33,49 @@ export const TodoList: React.FC<Props> = () => {
 
   const [isHistory, setIsHis] = useState<boolean>(false);
 
+  async function getTodo() {
+    if (userId && userId !== -1) {
+      console.log(_upd);
+      const { data } = await getTodoList(userId);
+      const { data: todoList = [] } = data.data;
+
+      const solvedList = todoList.filter(elem => elem.isComplete);
+      const unsolvedList = todoList.filter(elem => !elem.isComplete);
+
+      setUnsolved(unsolvedList);
+      setSolved(solvedList);
+    }
+  }
+
   const openAddDialog = useCallback(() => {
     const { openDialog, closeDialog } = Dialog;
 
     const close = () => {
-      closeDialog('addTodoDialog');
+      closeDialog("addTodoDialog");
     };
 
     openDialog({
-      dialogId: 'addTodoDialog',
-      title: '添加代办事项',
+      dialogId: "addTodoDialog",
+      title: "添加代办事项",
       children: (
         <AddTodoForm
           userId={userId}
           closeDialog={close}
           callback={() => {
-            setUpd(_upd + 1);
+            getTodo();
           }}
           type="add"
         ></AddTodoForm>
       ),
-      style: { width: '50%' }
+      style: { width: "50%" }
     });
   }, [state]);
 
   useEffect(() => {
-    async function getTodo() {
-      if (userId && userId !== -1) {
-        const { data } = await getTodoList(userId);
-        const { data: todoList = [] } = data.data;
-
-        const solvedList = todoList.filter(elem => elem.isComplete);
-        const unsolvedList = todoList.filter(elem => !elem.isComplete);
-
-        setUnsolved(unsolvedList);
-        setSolved(solvedList);
-      }
-    }
     getTodo();
   }, [userId, _upd]);
 
-  const cardToggle: ICardProps['cardToggle'] = (isShow, toggle) => {
+  const cardToggle: ICardProps["cardToggle"] = (isShow, toggle) => {
     if (!isShow) {
       toggle();
     }
@@ -92,11 +94,11 @@ export const TodoList: React.FC<Props> = () => {
         </span>
         <div className={styles.tag}>
           <Tag
-            theme={isComplete ? 'green' : 'red'}
+            theme={isComplete ? "green" : "red"}
             outline
-            style={{ marginRight: '10px' }}
+            style={{ marginRight: "10px" }}
           >
-            {isComplete ? '已完成' : '未完成'}
+            {isComplete ? "已完成" : "未完成"}
           </Tag>
           {isComplete ? (
             isExpire ? (
@@ -122,7 +124,7 @@ export const TodoList: React.FC<Props> = () => {
       : await recallItem(dropItemId);
     if (data && data.status) {
       Notify.success(`${data.msg}，请刷新查看任务状态`);
-      window.location.reload();
+      getTodo();
     } else {
       Notify.error(`${data.msg}, 请重试`);
     }
@@ -154,6 +156,7 @@ export const TodoList: React.FC<Props> = () => {
             useStyle="custom"
             className={styles.todoContent}
             dropCallback={handleElemDrop(false)}
+            useDefaultMove={false}
           >
             {unsolvedList.map((elem, index) => (
               <DragElement
@@ -169,7 +172,7 @@ export const TodoList: React.FC<Props> = () => {
                   trigger="click"
                   noteRender={noteRender(elem)}
                   // @ts-ignore
-                  style={{ margin: '10px auto' }}
+                  style={{ margin: "10px auto" }}
                   cardToggle={cardToggle}
                 >
                   {({ slideUp }: { slideUp: TCardSlidUp }) => (
@@ -216,7 +219,7 @@ export const TodoList: React.FC<Props> = () => {
                   trigger="click"
                   noteRender={noteRender(elem)}
                   // @ts-ignore
-                  style={{ margin: '10px auto' }}
+                  style={{ margin: "10px auto" }}
                   cardToggle={cardToggle}
                 >
                   {({ slideUp }: { slideUp: TCardSlidUp }) => (
@@ -239,7 +242,7 @@ export const TodoList: React.FC<Props> = () => {
             </div>
 
             <Button type="primary" outline size="medium" onClick={alterEvent}>
-              {!isHistory ? '今日完成列表' : '历史完成列表'}
+              {!isHistory ? "今日完成列表" : "历史完成列表"}
             </Button>
           </div>
         </div>

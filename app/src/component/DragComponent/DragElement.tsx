@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import cx from 'classnames';
 import { DragContext } from './store';
 import { TDragCallback } from './index';
@@ -12,13 +12,18 @@ interface Props {
 
 export const DragElement: React.FC<Props> = props => {
   const { children, className, onDragStart, onDrag, onDragEnd } = props;
-  const { Factory } = useContext(DragContext);
+  const { Factory, useDefaultMove } = useContext(DragContext);
 
   const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
-    const target = event.target as HTMLElement;
-    event.dataTransfer.setData('sourceObj', Factory.getString(target));
-    target.style.opacity = '0.5';
-    onDragStart && onDragStart(event);
+    if (useDefaultMove) {
+      const target = event.target as HTMLElement;
+      event.dataTransfer.setData('sourceObj', Factory.getString(target));
+      target.style.opacity = '0.5';
+      onDragStart && onDragStart(event);
+    } else {
+      onDragStart && onDragStart();
+    }
+
   };
 
   const handleDragEnd = (event: React.DragEvent<HTMLDivElement>) => {
@@ -30,6 +35,10 @@ export const DragElement: React.FC<Props> = props => {
   const handleDrag = (event: React.DragEvent<HTMLDivElement>) => {
     onDrag && onDrag(event);
   };
+
+  useEffect(() => {
+    console.log(useDefaultMove);
+  }, [])
 
   return (
     <div

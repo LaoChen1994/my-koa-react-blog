@@ -57,7 +57,7 @@ const Home: React.FC<Props> = () => {
       getData();
       initBlogList();
     } catch (error) {
-      console.log("err=", error);
+      console.warn("err=", error);
     }
   }, []);
 

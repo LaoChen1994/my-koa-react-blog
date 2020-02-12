@@ -134,14 +134,20 @@ module.exports = {
   async getBlogList(ctx) {
     const { pageSize = 10, pageNumber = 0, userId } = ctx.query;
 
-    const sql = `select e.blogId,e.blogName,e.blogContent,e.publishDate,e.tagsId,d.userName,e.authorId,e.lastUpdateTime,d.avatarUrl from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId ${
-      userId ? "and userId=" + userId : ""
-    } order by blogId desc limit ${pageNumber * pageSize},${(pageNumber + 1) *
+    const sql = `select e.*,d.avatarUrl,COUNT(c.commentId) as commentNumber from (KOA_BLOG_CONTENT e left join KOA_BLOG_USER d on e.authorId=d.userId) left join KOA_BLOG_COMMENT c on c.belongText=e.blogId  ${
+      userId ? "where userId=" + userId : ""
+    } group by e.blogId order by blogId desc limit ${pageNumber * pageSize},${(pageNumber + 1) *
       pageSize}`;
+
+    // const sql = `select e.blogId,e.blogName,e.blogContent,e.publishDate,e.tagsId,d.userName,e.authorId,e.lastUpdateTime,d.avatarUrl from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId ${
+    //   userId ? "and userId=" + userId : ""
+    // } order by blogId desc limit ${pageNumber * pageSize},${(pageNumber + 1) *
+    //   pageSize}`;
 
     const countSql = `select COUNT(*) as totalNumber from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId  ${
       userId ? "and userId=" + userId : ""
     }`;
+
     let [_, count] = await to(query(countSql));
 
     let [err, data] = await to(query(sql));
@@ -163,8 +169,9 @@ module.exports = {
   },
   async getBlogDetail(ctx) {
     const { blogId } = ctx.query;
-    const sqlContent = `select c.blogId,c.blogName,c.lastUpdateTime,c.authorId,c.tagsId,c.publishDate,d.userName as username,c.blogContent,d.avatarUrl from KOA_BLOG_CONTENT c, KOA_BLOG_USER d where c.blogId=${blogId} and c.authorId=d.userId`;
+    const sqlContent = `select c.*,d.userName as username,c.blogContent,d.avatarUrl from KOA_BLOG_CONTENT c, KOA_BLOG_USER d where c.blogId=${blogId} and c.authorId=d.userId`;
     const [contentErr, content] = await to(query(sqlContent));
+
     if (contentErr) {
       setCtxBody(contentErr, {}, ctx, "", "文章信息查询失败！");
       return;
@@ -175,12 +182,28 @@ module.exports = {
     const tagsId = getBlogTags(content[0].tagsId);
     const userId = content[0].authorId;
     const sqlTags = `select * from KOA_BLOG_TAGS where tagId in (${tagsId})`;
+    const addViewNumber = `update KOA_BLOG_CONTENT set viewNumber=${content[0]
+      .viewNumber + 1} where blogId=${blogId}`;
+
+    const [viewAddError, viewAddSuccess] = await to(query(addViewNumber));
+
+    if (viewAddError) {
+      console.warn(viewAddError);
+    }
+
     const [tagsErr, tags] = await to(query(sqlTags));
     const [numberErr, totalBlog] = await to(
       query(
         `select Count(*) as number from KOA_BLOG_CONTENT where authorId=${userId}`
       )
     );
+
+    const [commentErr, commentNumber] = await to(
+      query(
+        `select COUNT(*) as commentNumber from KOA_BLOG_COMMENT where belongText=${blogId}`
+      )
+    );
+
     content[0].lastUpdateTime = timeFormat(content[0].lastUpdateTime);
     content[0].publishDate = timeFormat(content[0].publishDate);
     content[0].avatarUrl = formatAvatarUrl(content[0]).avatarUrl;
@@ -194,7 +217,8 @@ module.exports = {
       {
         ...content[0],
         tags,
-        blogNumber: totalBlog[0].number
+        blogNumber: totalBlog[0].number,
+        commentNumber: !commentErr ? commentNumber[0].commentNumber : 0
       },
       ctx,
       "查询成功",

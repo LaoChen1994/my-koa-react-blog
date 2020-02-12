@@ -60,6 +60,7 @@ export const AddTodoForm: React.FC<IAddTodoProps> = props => {
     if (data.status) {
       Notify.success(data.msg);
       closeDialog();
+      console.log('update', callback);
       callback && callback();
     } else {
       Notify.error(data.msg);

@@ -1,10 +1,10 @@
-import React from 'react';
-import { TBlogBrief } from '../../api/interface';
-import styles from './style.module.scss';
-import { useHistory } from 'react-router-dom';
-import { staticServer } from '../../constant';
-import { Button } from 'zent';
-import cx from 'classnames';
+import React from "react";
+import { TBlogBrief } from "../../api/interface";
+import styles from "./style.module.scss";
+import { useHistory } from "react-router-dom";
+import { staticServer } from "../../constant";
+import { Button, Icon } from "zent";
+import cx from "classnames";
 
 interface Props {
   data: TBlogBrief;
@@ -19,7 +19,9 @@ export const BlogCard: React.FC<Props> = props => {
     blogId,
     blogName,
     blogContent,
-    avatarUrl
+    avatarUrl,
+    viewNumber,
+    commentNumber
   } = data;
   const history = useHistory();
 
@@ -44,9 +46,11 @@ export const BlogCard: React.FC<Props> = props => {
         <div className={styles.titleText}>{blogName}</div>
         <div
           className={styles.controller}
-          style={{ display: isEditable ? 'block' : 'none' }}
+          style={{ display: isEditable ? "block" : "none" }}
         >
-          <Button type="primary" onClick={handleEdit}>编辑</Button>
+          <Button type="primary" onClick={handleEdit}>
+            编辑
+          </Button>
           <Button type="success" outline onClick={handleClick}>
             查看
           </Button>
@@ -63,7 +67,11 @@ export const BlogCard: React.FC<Props> = props => {
           className={styles.avatar}
         />
         <span className={styles.author}>{userName}</span>
-        <span className={styles.time}>{lastUpdateTime}</span>
+        <span className={styles.time}>最近更新日期: {lastUpdateTime}</span>
+        <div className={styles.right}>
+          <span className={styles.comment}>评论数:{commentNumber}</span>
+          <span className={styles.view}>浏览量:{viewNumber}</span>
+        </div>
       </div>
     </div>
   );

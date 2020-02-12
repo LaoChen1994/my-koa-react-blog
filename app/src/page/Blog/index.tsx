@@ -42,7 +42,7 @@ const CBlog = (props: Props & RouteComponentProps) => {
     return new Promise((resolve, reject) => {
       reject("Error Page");
     });
-  }; 
+  };
 
   const loadFunc = (
     data: ICommonApiInterface<IStatus & IData<TBlogDetailInfo>>
@@ -90,7 +90,9 @@ const CBlog = (props: Props & RouteComponentProps) => {
   return (
     <div className={styles.wrapper}>
       <div className={showTab ? styles.blogTabber : styles.hidden}>
-        <Link to={`/`}>博客主页</Link>
+        <Link to={`/`}>
+          <Icon type="knowledge-o"></Icon> 博客主页
+        </Link>
         <Link to={`${url}/blogEdit`}>
           <Icon type="edit-o"></Icon> 写博客
         </Link>
