@@ -122,6 +122,7 @@ export const MyBlogList: React.FC<Props> = () => {
               data={elem}
               key={`blog-card-${index}`}
               isEditable={true}
+              deleteCallBack={_getListInfo}
             ></BlogCard>
           ))}
         </div>

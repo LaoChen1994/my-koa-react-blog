@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useContext } from "react";
-import { RefWriter } from "./Writer";
+import { RefWriter } from "../../component/WriterWithController";
 import "braft-editor/dist/index.css";
 import styles from "./style.module.scss";
 import {
@@ -146,10 +146,7 @@ export const WriteBlog: React.FC<IWriteBlogProps> = props => {
         </div>
 
         <div className={styles.textEditor}>
-          <RefWriter
-            ref={writerRef}
-            defaultValue={defaultValue?.content}
-          ></RefWriter>
+          <RefWriter ref={writerRef} defaultValue={defaultValue?.content} />
         </div>
         {/* 
         // @ts-ignore */}

@@ -7,7 +7,8 @@ import {
   TGetBlogDetail,
   TModifyBlog,
   TAddComment,
-  TGetCommentList
+  TGetCommentList,
+  TDeleteBlog
 } from "./interface";
 
 const URL = `${ApiHost}/blog`;
@@ -68,3 +69,6 @@ export const getComment: TGetCommentList = (
   pageSize = 5
 ) =>
   axios.get(`${URL}/getComments`, { params: { blogId, pageSize, pageNumber } });
+
+export const deleteBlog: TDeleteBlog = blogId =>
+  axios.post(`${URL}/deleteBlog`, { blogId });

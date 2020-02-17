@@ -251,3 +251,7 @@ export type TGetCommentList = (
       }>
   >
 >;
+
+export type TDeleteBlog = (
+  blogId: number
+) => Promise<ICommonApiInterface<IStatus>>;

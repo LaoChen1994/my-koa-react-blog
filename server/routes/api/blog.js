@@ -10,5 +10,6 @@ router.post("/blogImageUpload", BlogController.blogMediaUpload);
 router.post("/modifyBlog", BlogController.blogModify);
 router.post('/addComment', BlogController.addComment);
 router.get('/getComments', BlogController.queryCommentList);
+router.post('/deleteBlog', BlogController.deleteBlog);
 
 module.exports = router;
