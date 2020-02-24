@@ -1845,6 +1845,41 @@ export function AvatarUpload(props: IAvatarUploadProps) {
 }
 ~~~
 
+### 20. boder-image, border-clip, border-origin
+
+今天看了一篇博文，学到了不会的几个ｃｓｓ用法[渐变圆角](https://juejin.im/post/5e4a3a20e51d45270c277754)
+
+**border-image**: 设置背景图片以及北京颜色
+
+**border-clip**: 背景色从哪里开始截取，如果设置为content-block的话说明背景色只覆盖到盒子内，如果有padding的话在padding的部分是不会出现这样的颜色的
+
+**border-origin**: border-position相对的relative的位置
+
+>  border-image中的属性和border-clip属性是对应的，border-clip会指定border-image对应的属性的背景在图中的表现
+
+~~~css
+.box {
+  padding: 30px;
+  width: 300px;
+  height: 300px;
+  background-image:linear-gradient(#fee, #fee), linear-gradient(to right, green, gold);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+~~~
+
+~~~html
+<div class="box">123</div>
+~~~
+
+#### 效果
+
+![](./img/选区_029.png)
+
+
+
 ### 1. shadowsocks配置
 
 + 使用命令行工具shadowsocks-libev进行翻墙
