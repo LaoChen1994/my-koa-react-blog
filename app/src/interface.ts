@@ -1,11 +1,11 @@
 export type UserAction =
-  | { type: 'login'; payload: IUserState }
-  | { type: 'logout' };
+  | { type: "login"; payload: IUserState }
+  | { type: "logout" };
 
 export interface IBlogTag {
   tagId: number;
   tagName: string;
-  userId: IUserState['userId'];
+  userId: IUserState["userId"];
   articalNumber: number;
 }
 
@@ -21,9 +21,13 @@ export interface IUserLink {
   title: string;
   icon?: string;
   link?: string;
-  callback?: () => void
+  callback?: () => void;
 }
 
 export interface ILinkMap {
-  [key: string]: IUserLink
+  [key: string]: IUserLink;
 }
+
+export type TransMap<T> = {
+  [P in keyof T]?: string;
+};

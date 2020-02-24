@@ -1,26 +1,25 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { UserContext } from '../../store/users';
-import styles from './style.module.scss';
-import { Header } from '../../component/Header';
+import React, { useEffect, useState, useContext } from "react";
+import { UserContext } from "../../store/users";
+import styles from "./style.module.scss";
+import { Header } from "../../component/Header";
 import {
   HashRouter as Router,
   Switch,
   Route,
   Redirect
-} from 'react-router-dom';
-import Login from '../../page/Login';
-import Home from '../../page/Home';
-import { Register } from '../../page/Register';
-import { TodoList } from '../../page/Todo';
-import NotFound from '../NotFound';
-import { Blog } from '../Blog';
+} from "react-router-dom";
+import Login from "../../page/Login";
+import Home from "../../page/Home";
+import { Register } from "../../page/Register";
+import { TodoList } from "../../page/Todo";
+import NotFound from "../NotFound";
+import { Blog } from "../Blog";
 
-import { getHome } from '../../api/home';
-import { initUserInfo } from '../../constant';
-import { IUserState } from '../../interface';
-import { FileCenter } from '../FileCenter';
-import { SwitchHeader } from '../../store/SwitchHeader';
-
+import { getHome } from "../../api/home";
+import { initUserInfo } from "../../constant";
+import { IUserState } from "../../interface";
+import { FileCenter } from "../FileCenter";
+import { UserCenter } from "../UserCenter";
 
 const RouterPage: React.FC = () => {
   // !window._global &&
@@ -38,11 +37,12 @@ const RouterPage: React.FC = () => {
   const { state } = useContext(UserContext);
 
   useEffect(() => {
-    const token = localStorage.getItem('userToken');
+    const token = localStorage.getItem("userToken");
 
     async function userValidate() {
       const { data } = await getHome();
       if (data && data.status) {
+        console.log(data.userInfo);
         setUserInfo({ ...data.userInfo, isLogin: true });
       }
     }
@@ -59,7 +59,7 @@ const RouterPage: React.FC = () => {
           <Redirect
             path="/"
             exact
-            to={state.isLogin ? '/home' : '/Login'}
+            to={state.isLogin ? "/home" : "/Login"}
           ></Redirect>
           <Route exact path="/Login">
             <Login></Login>
@@ -81,6 +81,9 @@ const RouterPage: React.FC = () => {
           </Route>
           <Route exact path="/404">
             <NotFound></NotFound>
+          </Route>
+          <Route exact path="/userCenter">
+            <UserCenter></UserCenter>
           </Route>
           <Redirect path="/" to="/404"></Redirect>
         </Switch>

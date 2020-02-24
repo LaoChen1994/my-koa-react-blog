@@ -1,9 +1,9 @@
-import React from 'react';
-import { IUserDetail } from '../../api/interface';
-import styles from './style.module.scss';
-import { staticServer, transMap } from '../../constant';
-import { useHistory } from 'react-router-dom';
-import { Icon } from 'zent';
+import React from "react";
+import { IUserDetail } from "../../api/interface";
+import styles from "./style.module.scss";
+import { staticServer, transMap } from "../../constant";
+import { useHistory } from "react-router-dom";
+import { Icon } from "zent";
 
 interface Props {
   data: IUserDetail;
@@ -28,7 +28,7 @@ export const DetailBlock: React.FC<Props> = props => {
           <div className={styles.link} onClick={handleLink}>
             <Icon
               type="link"
-              style={{ fontSize: '20px', verticalAlign: 'middle' }}
+              style={{ fontSize: "20px", verticalAlign: "middle" }}
             />
             去Ta的主页
           </div>
@@ -37,9 +37,9 @@ export const DetailBlock: React.FC<Props> = props => {
       <div className={styles.detail}>
         {Object.entries(res).map(
           ([key, value], index) =>
-            transMap[key] && (
+            transMap[key as keyof IUserDetail] && (
               <div className={styles.detailText} key={`item-${index}`}>
-                {transMap[key]}: {value}
+                {transMap[key as keyof IUserDetail]}: {value}
               </div>
             )
         )}
