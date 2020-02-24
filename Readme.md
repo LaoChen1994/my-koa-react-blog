@@ -29,16 +29,19 @@
 | 代办事项     | 1. 代办事项添加<br />2. 代办事项修改<br />3. 代办事项删除<br />4. 代办事项完成<br />5. 代办事项拖动完成，拖动撤回(拖动React组件完成) | 全部完成 |
 | 博客首页     | 1. 博客列表查询<br />2. 博客列表的滑动下拉加载<br />3. 博客首页代办事项提醒<br />4. 博客首页头部信息<br />5.博客浏览量和评论数查询 | 完成     |
 | 文件中心     | 1. 文件的上传<br />2. 文件的下载<br />3. 文件列表的查询      | 完成     |
-| 博客         | 1. 添加博文标签<br />2. 博文副文本编辑<br />3. 博客的修改<br />4. 博客评论系统完成<br />5. 博文的模糊查询功能 | 完成     |
+| 博客         | 1. 添加博文标签<br />2. 博文副文本编辑<br />3. 博客的修改<br />4. 博客评论系统完成<br />5. 博文的模糊查询功能<br />6. 博文的删除功能 | 完成     |
 | 个人博客中心 | 1. 个人博客分页查询<br />2. 个人博客的编辑查看               | 完成     |
 | 用户登陆     | /                                                            | 完成     |
 | 用户注册     | /                                                            | 完成     |
+| 用户中心     | 1. 用户头像的修改<br>2. 用户详细信息的展示<br>3. 用户详细信息的修改功能 | 完成     |
+
+
 
 ##### **即将更新**
 
-4. 博文和文件的删除
+1. 进入用户个人博客主页
 
-**。。。。。。。。。。。。**
+......
 
 ## 下面为开发过程中碰到的问题小结
 
@@ -1273,7 +1276,7 @@ export default function App() {
 
 上述代码理论上随着defaultValue变为Init123，应该用户名的默认值会变为Init123, 然而其默认值还是123
 
-![](/home/czx/Desktop/Learn/my-koa-react-blog/img/Selection_008.png)
+![](./img/Selection_008.png)
 
 ##### 3. 原因分析
 
@@ -1561,6 +1564,286 @@ function usePrevious(value) {
 [Introduction to useRef Hook](https://dev.to/dinhhuyams/introduction-to-useref-hook-3m7n): 这篇文章很好的讲解了useRef和createRef以及useRef的用法！
 
 
+
+### 17. 无限下拉的例子
+
+[参考博文](https://juejin.im/post/5d7f80796fb9a06b24434d4e)
+
+#### 1. 工具介绍
+
++ **IntersectionObserver:** 一个元素是否在视窗中可见， 通过该对象实现对于DOM元素的异步监听功能的实现。
+
+基本使用方法： 
+
++ 创建一个IntersectionObserver的类函数，在类函数创建时，传入需要监听事件的回调处理函数
++ 主要用用于当元素和视窗发生交互时候，调用回调函数
++ 回调中的entities是所有监听对象组成的数组，通过监听单个entity的isIntersecting方法可以知道哪个元素与视窗发生了何种交互
++ 通过entity,target能够获得元素的DOM实例
++ 使用observer.unobserve可以取消监听某个DOM元素，利用observer.disconnect可以取消所有监听DOM
+
+#### 2. 使用该方法实现一个无限下拉
+
+
+
+
+
+ 
+
+### 18. 常用的几个height
+
+##### 参考文章
+
+[图解scrollHeight, clientHeight, offsetHeight, scrollTop以及获取方法](https://www.jianshu.com/p/d267456ebc0d)
+
+##### 常用height介绍
+
++ width和height: 元素的高度和宽度，不包括padding和border
++ clientWidth和clientHeight: 包括元素的padding的宽高，(如果元素内存在滚动条，不包括该滚动条的长度)
++ scrollWidth和ScrollHeight: 元素内元素的整体高度，如果有滚动元素是整个滚动元素的高度，不包括滚动条
++ offserWidth和offsetHeight: 整个元素的大小，包括内部的滚动条的宽度和border
+
+![常用的几个height](https://upload-images.jianshu.io/upload_images/5711289-90334d2179e36898.png?imageMogr2/auto-orient/strip|imageView2/2/w/521/format/webp)
+
++ clientHeight和clientLeft：等于border的宽度(固定)
++ scrollTop: 滚动元素顶端到视口内元素顶部的距离，也可以说是滚动条滑动的距离
+
+##### 验证例子
+
+~~~html
+<div class='box'>
+    <div class='Container'>
+         asdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasasdasdasdasdasdas
+    </div>
+</div>
+~~~
+
+~~~css
+.Container {
+   background: red;
+  width: 200px;
+  height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  white-space: normal;
+  word-break: break-all;
+  word-wrap: break-word;
+  padding: 20px;
+  border: 2px solid #666;
+}
+~~~
+
+~~~javascript
+const div = document.querySelector('.Container');
+
+console.log(1)
+console.log(div.offsetWidth);
+console.log(div.clientWidth);
+console.log(div.scrollHeight);
+div.addEventListener('scroll', () => {console.log(div.scrollTop, div.clientLeft)});
+~~~
+
+### 19.  拖拽上传图片并展示上传图片
+
+#### 1. 解决思路：
+
++ 通过利用，监听drop方法，从dataTransfer中得到上传的源文件
++ 利用FileReader类中的readAsDataURL将二进制文件转换成base64字符串
++ 将该字符串放入img的src中即可
++ 上传功能使用FormData进行处理，利用append方法添加内容
++ 之后利用post上传到服务器，获取文件地址
+
+##### 1. 核心处理
+
+详细内容见注释
+
++ 浏览器读取文件并显示
+
+~~~javascript
+const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    //@ts-ignore
+    e.preventDefault();
+    // 获得拖动到页面上制定位置的文件内容
+    const { files } = e.dataTransfer;
+    const file = files[0];
+
+    // 判断文件类型
+    if (!file.type.startsWith("image")) {
+        Notify.error("只能上传图片文件");
+        return;
+    }
+
+    // 检验文件上传的大小
+    if (!file) return;
+    if (file.size > maxFileSize) {
+        Notify.error("上传文件最大小不能超过10M");
+        return;
+    }
+    // 读取文件到base64
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    // 当文件读取完毕时，保存为base64的字符串，后面img标签检测到变化后会自动渲染
+    reader.onload = e => {
+        const value = (e.target?.result as string) || "";
+                       setFileUrl(value);
+    };
+    // 报错
+    setFile(file);
+};
+~~~
+
++ 上传
+
+~~~javascript
+const handleSubmit: IAvatarUploadProps["handleSubmit"] = async (
+    file,
+    setLoad
+) => {
+    setLoad(true);
+    // 添加需要上传的文件
+    const fileData = new FormData();
+    fileData.append("file", file, file.name);
+    // 添加完毕直接传就好了
+    const { data } = await modifyAvatarApi(fileData);
+    const { status, data: fileDetail, msg } = data;
+    if (status) {
+        const { filePath } = fileDetail;
+        const { data } = await updateAvatarApi(userId, filePath);
+        data.status ? Notify.success(msg) : Notify.error(msg);
+        data.status &&
+            (() => {
+            dispatch({
+                type: "login",
+                payload: { ...state, avatarUrl: filePath }
+            });
+            setUserInfo({ ...userInfo, avatarUrl: filePath });
+            window.localStorage.setItem("userToken", data.data.token);
+        })();
+        setLoad(false);
+        closeDialog(dialogId);
+    } else {
+        Notify.error(msg);
+    }
+};
+
+// 上传API
+export const modifyAvatarApi: TModifyAvatar = (data: FormData) =>
+  Axios.post(`${URL}/modifyAvatar`, data, {
+    headers: { "Content-Type": "multipart/form-data" }
+});
+~~~
+
+##### 2. 注意几个坑
+
+**dragOver和drop事件中一定要阻止默认事件，不然的话会直接把图片文件在浏览器中显示，或者下载！！**
+
+#### 2. 实现效果
+
+#### 	![](./img/Peek 2020-02-24 15-22.gif)
+
+
+
+#### 3. 完整代码
+
+~~~react
+import React, { useState } from "react";
+import styles from "./style.module.scss";
+import { Notify, Icon, Button, BlockLoading } from "zent";
+
+export interface IAvatarUploadProps {
+  maxFileSize: number;
+  handleSubmit: (
+    file: File,
+    setLoad: React.Dispatch<React.SetStateAction<boolean>>
+  ) => void;
+}
+
+export function AvatarUpload(props: IAvatarUploadProps) {
+  const { maxFileSize, handleSubmit } = props;
+  const [avatarFile, setFile] = useState<File>();
+  const [localUrl, setFileUrl] = useState<string>();
+  const [loading, setLoad] = useState<boolean>(false);
+
+  const handleDrageOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    //@ts-ignore
+    e.preventDefault();
+    const { files } = e.dataTransfer;
+    const file = files[0];
+
+    if (!file.type.startsWith("image")) {
+      Notify.error("只能上传图片文件");
+      return;
+    }
+
+    if (!file) return;
+    if (file.size > maxFileSize) {
+      Notify.error("上传文件最大小不能超过10M");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = e => {
+      const value = (e.target?.result as string) || "";
+      setFileUrl(value);
+    };
+
+    setFile(file);
+  };
+
+  return (
+    <BlockLoading loading={loading}>
+      <div
+        className={styles.avatarBox}
+        onDragOver={handleDrageOver}
+        onDrop={handleFileDrop}
+      >
+        {!(avatarFile && avatarFile.name) ? (
+          <div className={styles.emptyBox}>
+            {
+              <span>
+                <Icon type="customer-o" /> 请选择你需上传的头像
+              </span>
+            }
+          </div>
+        ) : (
+          <>
+            <div className={styles.wrapper}>
+              <div className={styles.showImage}>
+                <img src={localUrl} alt="上传头像" />
+              </div>
+              <Icon
+                type="right-circle"
+                style={{ fontSize: "20px", margin: "0 20px" }}
+              />
+              <div className={styles.resultBox}>
+                <img
+                  src={localUrl}
+                  alt="处理后图片"
+                  className={styles.result}
+                />
+                <div className={styles.caption}>处理后图片</div>
+              </div>
+            </div>
+            <div className={styles.bottom}>
+              <Button
+                onClick={() => avatarFile && handleSubmit(avatarFile, setLoad)}
+                type="primary"
+                outline
+              >
+                提交修改
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </BlockLoading>
+  );
+}
+~~~
 
 ### 1. shadowsocks配置
 

@@ -1,4 +1,4 @@
-@import '../../static/style/mixins.scss';
+@import "../../static/style/mixins.scss";
 
 .wrapper {
   @extend .pageWidth;
@@ -52,6 +52,32 @@
     max-height: 200px;
     width: auto;
   }
+
+  & > pre {
+    background-color: #eee;
+    color: $blue;
+    display: flex;
+    align-items: flex-start;
+
+    & > ul {
+      margin: 0;
+      padding: 0;
+      background: #ddd;
+      width: 50px;
+      & > li {
+        text-align: center;
+
+        margin: 10px 0;
+      }
+    }
+
+    & > code {
+      & > div {
+        color: rgb(212, 50, 50);
+        margin: 10px 0;
+      }
+    }
+  }
 }
 
 .bottomSplit {
@@ -74,4 +100,12 @@
   font-weight: 500;
   margin-right: 20px;
   margin-left: 5px;
+}
+
+.Notes {
+  @extend .note_text;
+  padding: 100px 50px;
+  font-size: 24px;
+  line-height: 40px;
+  text-align: center;
 }

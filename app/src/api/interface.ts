@@ -1,5 +1,6 @@
 import { IUserState, IBlogTag } from "../interface";
 import { TNewTags } from "../component/TagsSelection/CloseTags";
+import { AxiosAdapter } from "axios";
 
 export interface ICommonApiInterface<T> {
   data: T;
@@ -29,11 +30,15 @@ export interface IBlogInfo {
 }
 
 export interface IUserDetail {
+  nicoName: string;
   userId: number;
   Email: string;
   avatarUrl: string;
-  blogNumber?: number;
   userName: string;
+  blogNumber?: number;
+  introduction: null | string;
+  birth: null | string;
+  phoneNumber?: string;
 }
 
 export interface IBlogListStatic {
@@ -251,3 +256,21 @@ export type TGetCommentList = (
       }>
   >
 >;
+
+export type TDeleteBlog = (
+  blogId: number
+) => Promise<ICommonApiInterface<IStatus>>;
+
+export type TModifyAvatar = (
+  file: FormData
+) => Promise<ICommonApiInterface<IStatus & IData<IUploadResponse>>>;
+
+export type TUpdateAvatar = (
+  userId: number,
+  avatarUrl: string
+) => Promise<ICommonApiInterface<IStatus & IData<{ token: string }>>>;
+
+export type TUpdateUserInfo = (userInfo: Pick<
+  IUserDetail,
+  "Email" | "birth" | "nicoName" | "introduction" | "phoneNumber" | "userId"
+>) => Promise<ICommonApiInterface<IStatus>>

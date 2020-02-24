@@ -134,15 +134,10 @@ module.exports = {
   async getBlogList(ctx) {
     const { pageSize = 10, pageNumber = 0, userId } = ctx.query;
 
-    const sql = `select e.*,d.avatarUrl,COUNT(c.commentId) as commentNumber from (KOA_BLOG_CONTENT e left join KOA_BLOG_USER d on e.authorId=d.userId) left join KOA_BLOG_COMMENT c on c.belongText=e.blogId  ${
-      userId ? "where userId=" + userId : ""
-    } group by e.blogId order by blogId desc limit ${pageNumber * pageSize},${(pageNumber + 1) *
-      pageSize}`;
-
-    // const sql = `select e.blogId,e.blogName,e.blogContent,e.publishDate,e.tagsId,d.userName,e.authorId,e.lastUpdateTime,d.avatarUrl from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId ${
-    //   userId ? "and userId=" + userId : ""
-    // } order by blogId desc limit ${pageNumber * pageSize},${(pageNumber + 1) *
-    //   pageSize}`;
+    const sql = `select e.*,d.avatarUrl,COUNT(c.commentId) as commentNumber from (KOA_BLOG_CONTENT e left join KOA_BLOG_USER d on e.authorId=d.userId) left join KOA_BLOG_COMMENT c on c.belongText=e.blogId where e.isDelete=false  ${
+      userId ? "and userId=" + userId : ""
+    } group by e.blogId order by blogId desc limit ${pageNumber *
+      pageSize},${(pageNumber + 1) * pageSize}`;
 
     const countSql = `select COUNT(*) as totalNumber from KOA_BLOG_CONTENT e inner join KOA_BLOG_USER d where e.authorId=d.userId  ${
       userId ? "and userId=" + userId : ""
@@ -155,7 +150,7 @@ module.exports = {
 
     data = data.map(elem => {
       elem = formatAvatarUrl(elem);
-      elem.blogContent = elem.blogContent.replace(regx, "");
+      elem.blogContent = elem.blogContent ? elem.blogContent.replace(regx, "") : '';
       return elem;
     });
 
@@ -169,7 +164,7 @@ module.exports = {
   },
   async getBlogDetail(ctx) {
     const { blogId } = ctx.query;
-    const sqlContent = `select c.*,d.userName as username,c.blogContent,d.avatarUrl from KOA_BLOG_CONTENT c, KOA_BLOG_USER d where c.blogId=${blogId} and c.authorId=d.userId`;
+    const sqlContent = `select c.*,d.userName as username,c.blogContent,d.avatarUrl from KOA_BLOG_CONTENT c, KOA_BLOG_USER d where c.blogId=${blogId} and c.authorId=d.userId and c.isDelete=false`;
     const [contentErr, content] = await to(query(sqlContent));
 
     if (contentErr) {
@@ -324,5 +319,12 @@ module.exports = {
     }
 
     setCtxBody(false, {}, ctx, "", "列表获取失败");
+  },
+  async deleteBlog(ctx) {
+    const { blogId } = ctx.request.body;
+    const sql = `update KOA_BLOG_CONTENT set isDelete=true where blogId=${blogId}`;
+    const [deleteErr, success] = await to(query(sql));
+
+    setCtxBody(deleteErr, success, ctx, "删除成功", "删除过程失败");
   }
 };

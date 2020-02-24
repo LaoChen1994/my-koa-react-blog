@@ -20,8 +20,8 @@ module.exports = {
       ctx.body = genResp(true, okMsg, data);
     } else {
       console.log(error);
-      errorMsg = errorMsg | '内部服务器错误';
-      ctx.body = genResp(false, okMsg, {});
+      errorMsg = errorMsg || '内部服务器错误';
+      ctx.body = genResp(false, errorMsg, {});
     }
   },
   timeFormat: timeStr => moment(new Date(timeStr)).format('YYYY-MM-DD HH:mm:ss')

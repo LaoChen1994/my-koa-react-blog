@@ -68,3 +68,18 @@
     float: right;
   }
 }
+
+.bold {
+  @extend .normal_text;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.important {
+  font-weight: 600;
+  color: #f44;
+  font-size: 14px;
+  line-height: 20px;
+  margin-top: 10px;
+}

@@ -5,6 +5,9 @@ const { query } = require("../model/utils/query");
 const moment = require("moment");
 const iconv = require("iconv-lite");
 
+// 后端重构的思路
+// 大部分代码都可以提出来的，接口只需调用通用函数，再加上特定的处理方法即可
+
 module.exports = {
   async getHomeLogin(ctx) {
     const { user } = ctx.state;
