@@ -1,4 +1,4 @@
-@import '../../static/style/mixins.scss';
+@import "../../static/style/mixins.scss";
 
 .wrapper {
   @include blockShadow(#333);
@@ -20,18 +20,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
 }
 
 .titleText {
   flex: 1;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .controller {
   flex: 0 200px;
   text-align: right;
-
 }
 
 .avatar {
@@ -39,6 +37,7 @@
   height: 20px;
   border-radius: 50%;
   margin-right: 10px;
+  vertical-align: middle;
 }
 
 .brief {
@@ -82,4 +81,14 @@
   font-size: 14px;
   line-height: 20px;
   margin-top: 10px;
+}
+
+.tips {
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba($color: #333, $alpha: 0.4);
+  background-color:rgba($color: #fff, $alpha: 0.5);
+  color: #f44;
+  position: relative;
+  left: 60px;
 }

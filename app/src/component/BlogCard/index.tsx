@@ -1,9 +1,9 @@
-import React from "react";
+import React, { ReactEventHandler } from "react";
 import { TBlogBrief } from "../../api/interface";
 import styles from "./style.module.scss";
 import { useHistory } from "react-router-dom";
 import { staticServer } from "../../constant";
-import { Button, Dialog, Notify } from "zent";
+import { Button, Dialog, Notify, Popover } from "zent";
 import cx from "classnames";
 import { deleteBlog } from "../../api/blog";
 
@@ -26,7 +26,8 @@ export const BlogCard: React.FC<Props> = props => {
     blogContent,
     avatarUrl,
     viewNumber,
-    commentNumber
+    commentNumber,
+    authorId
   } = data;
   const history = useHistory();
 
@@ -36,6 +37,10 @@ export const BlogCard: React.FC<Props> = props => {
 
   const handleEdit = () => {
     history.push(`/blog/blogEdit/${blogId}`);
+  };
+
+  const handleToAuthor = () => {
+    history.push(`/blog/${authorId}`);
   };
 
   const confirmDelete = async () => {
@@ -77,42 +82,61 @@ export const BlogCard: React.FC<Props> = props => {
     });
   };
 
+  const linkToUserPage = (e: React.MouseEvent<HTMLImageElement>) => {
+    e.stopPropagation();
+    handleToAuthor();
+  };
+
   return (
     <div
       className={cx({
-        [styles.wrapper]: true,
-        [styles.cursorPointer]: !isEditable
+        [styles.wrapper]: true
       })}
       {...(!isEditable && { onClick: handleClick })}
       {...res}
     >
-      <div className={styles.title}>
-        <div className={styles.titleText}>{blogName}</div>
-        <div
-          className={styles.controller}
-          style={{ display: isEditable ? "block" : "none" }}
-        >
-          <Button type="primary" onClick={handleEdit}>
-            编辑
-          </Button>
-          <Button type="success" outline onClick={handleClick}>
-            查看
-          </Button>
-          <Button type="danger" onClick={handleDelete}>
-            删除
-          </Button>
+      <div
+        className={cx({
+          [styles.cursorPointer]: !isEditable
+        })}
+      >
+        <div className={styles.title}>
+          <div className={styles.titleText}>{blogName}</div>
+          <div
+            className={styles.controller}
+            style={{ display: isEditable ? "block" : "none" }}
+          >
+            <Button type="primary" onClick={handleEdit}>
+              编辑
+            </Button>
+            <Button type="success" outline onClick={handleClick}>
+              查看
+            </Button>
+            <Button type="danger" onClick={handleDelete}>
+              删除
+            </Button>
+          </div>
         </div>
+        <p
+          className={styles.brief}
+          dangerouslySetInnerHTML={{ __html: blogContent }}
+        ></p>
       </div>
-      <p
-        className={styles.brief}
-        dangerouslySetInnerHTML={{ __html: blogContent }}
-      ></p>
       <div className={styles.bottom}>
-        <img
-          src={`${staticServer}${avatarUrl}`}
-          alt="用户头像"
-          className={styles.avatar}
-        />
+        <Popover position={Popover.Position.BottomRight}>
+          <Popover.Trigger.Hover>
+            <img
+              src={`${staticServer}${avatarUrl}`}
+              alt="用户头像"
+              className={styles.avatar}
+              onClick={linkToUserPage}
+            />
+          </Popover.Trigger.Hover>
+          <Popover.Content >
+            <div className={styles.tips}>去Ta的主页</div>
+          </Popover.Content>
+        </Popover>
+
         <span className={styles.author}>{userName}</span>
         <span className={styles.time}>最近更新日期: {lastUpdateTime}</span>
         <div className={styles.right}>

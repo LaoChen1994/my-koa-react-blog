@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useContext } from "react";
 import { useRouteMatch } from "react-router-dom";
+import { UserContext } from "../../store/users";
 import styles from "./style.module.scss";
 import { getBlogList } from "../../api/blog";
 import { TBlogBrief, IUserDetail } from "../../api/interface";
@@ -16,13 +17,17 @@ interface Props {}
 
 export const MyBlogList: React.FC<Props> = () => {
   const { params } = useRouteMatch<{ userId: string }>();
+  const { state } = useContext(UserContext);
+
   const { userId } = params;
   const [myBlogs, setBlogs] = useState<TBlogBrief[]>([]);
   const [isSearch, setIsSearch] = useState<boolean>(false);
   const [lastVal, setLastVal] = useState<string>("");
   const [pageNumber, setPage] = useState<number>(0);
   const [useInfo, setUserInfo] = useState<IUserDetail>({} as IUserDetail);
+  const [isEditable, setEditable] = useState<boolean>(false);
   const pageSize = 10;
+  // const isEditable = userId
 
   const [pagination, setPagination] = usePagination({
     current: 1,
@@ -46,6 +51,10 @@ export const MyBlogList: React.FC<Props> = () => {
         })();
     }
   };
+
+  useEffect(() => {
+    setEditable(+params.userId === +state.userId);
+  }, [params.userId, state.userId]);
 
   const _getSearchInfo = async (value: string) => {
     !isSearch && setPage(0);
@@ -72,10 +81,10 @@ export const MyBlogList: React.FC<Props> = () => {
     }
   };
 
-  const handleSearchEmpty  = () => {
+  const handleSearchEmpty = () => {
     _getListInfo();
     setIsSearch(false);
-  }
+  };
 
   const _getUserInfo = useCallback(async () => {
     const { data } = await getUserDetail(+userId);
@@ -93,7 +102,7 @@ export const MyBlogList: React.FC<Props> = () => {
       ...pagination,
       current: pageNumber + 1
     });
-  }, [pageNumber]);
+  }, [pageNumber, params.userId]);
 
   const handlePageChange: PaginationChangeHandler = e => {
     const { current } = e;
@@ -121,7 +130,7 @@ export const MyBlogList: React.FC<Props> = () => {
             <BlogCard
               data={elem}
               key={`blog-card-${index}`}
-              isEditable={true}
+              isEditable={isEditable ? true : false}
               deleteCallBack={_getListInfo}
             ></BlogCard>
           ))}

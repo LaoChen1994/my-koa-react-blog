@@ -40,3 +40,15 @@
     margin: 0;
   }
 }
+
+.notes {
+  @extend .note_text;
+}
+
+.oneline {
+  @include setEllipse(1);
+}
+
+.twoLine {
+  @include setEllipse(2);
+}

@@ -1847,9 +1847,9 @@ export function AvatarUpload(props: IAvatarUploadProps) {
 
 ### 20. boder-image, border-clip, border-origin
 
-今天看了一篇博文，学到了不会的几个ｃｓｓ用法[渐变圆角](https://juejin.im/post/5e4a3a20e51d45270c277754)
+今天看了一篇博文，学到了不会的几个CSS用法[渐变圆角](https://juejin.im/post/5e4a3a20e51d45270c277754)
 
-**border-image**: 设置背景图片以及北京颜色
+**border-image**: 设置背景图片以及背景颜色
 
 **border-clip**: 背景色从哪里开始截取，如果设置为content-block的话说明背景色只覆盖到盒子内，如果有padding的话在padding的部分是不会出现这样的颜色的
 
@@ -1864,6 +1864,11 @@ export function AvatarUpload(props: IAvatarUploadProps) {
   height: 300px;
   background-image:linear-gradient(#fee, #fee), linear-gradient(to right, green, gold);
   background-origin: border-box;
+  /*
+  	这里说明一下 background-image和background-clip是相互配套的
+    第一个渐变色(就是灰色)对应的是content-box，所以不会渲染周围有border的那一圈以及padding的那一圈
+    第二个黄绿渐变的部分对应的border-clip为border-box，因此其背景色会渲染到整个盒子中，
+  */
   background-clip: content-box, border-box;
   border: 1px solid transparent;
   border-radius: 10px;
@@ -1878,7 +1883,83 @@ export function AvatarUpload(props: IAvatarUploadProps) {
 
 ![](./img/选区_029.png)
 
+### 21.通过几个CSS例子看filter和background属性
 
+今天看了一个帖子：[使用css滤镜的例子](https://juejin.im/post/5df3a049f265da33f8652882#heading-3)，从该帖子的例子中了解了不少css的之前不知道的知识，先列举，然后分析一下滤镜效果。
+
+#### 1. background-attchement
+
+文中有一个类似如下的毛玻璃的例子，其实现思路为，**先将背景图片铺满屏幕，之后添加内部子类元素，之后利用子类元素的滤镜功能filter，将所遮挡的元素进行模糊**。先分析效果图和代码，之后来讲怎么实现的。
+
+#####　实现效果
+
+![](./img/选区_030.png)
+
+##### 代码
+
+~~~html
+<div className="App">
+    <div className="opacity">这是一个毛玻璃的效果</div>
+</div>
+~~~
+
+~~~css
+/* 
+	为外部容器和子元素均设置背景图  
+    至于为什么要设置background-attachment等下分析
+*/
+.App,
+.opacity::before {
+  background-image: url("http://img4.imgtn.bdimg.com/it/u=3039320892,1295927504&fm=26&gp=0.jpg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-attachment: fixed;
+}
+
+.App {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.opacity {
+  fontsize: 20px;
+  color: white;
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  background: rgba(0, 100, 0, 0.5);
+}
+/*
+ 这里实现模糊是通过伪元素实现的
+ 如果直接在opacity上实现的话，会造成文字也模糊
+ 实现方法是将伪元素和内部容器的大小设为一致
+ 利用z-index置于底层，然后将opacity设为透明
+ 透明的部分可以看到下面对应的图片被模糊的效果
+*/
+.opacity::before {
+  content: " ";
+  filter: blur(5px);
+  z-index: -1;
+}
+
+.opacity,
+.opacity::before {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+}
+
+~~~
+
+##### 注意点
+
++ 这里的background-attachement不能删除，删除后发现，我们框住的部分中不再是“翅膀的效果”，而是缩小的图片的效果，其具体原因是[background-attachement真实面目](https://segmentfault.com/q/1010000011066337/)，其实可以理解为background-attachement类似于将该图片应用于整个视口，在这个场景中，就相当于伪类元素的背景也是整个适口这么大的一张图，但是只显示了在框内那一部分的图像，因此对该部分进行模糊刚好和底部的背景重叠。
+
+[代码codesandbox](https://codesandbox.io/embed/floral-meadow-rk1f1?fontsize=14&hidenavigation=1&theme=dark)
 
 ### 1. shadowsocks配置
 
