@@ -123,7 +123,7 @@ export const BlogCard: React.FC<Props> = props => {
         ></p>
       </div>
       <div className={styles.bottom}>
-        <Popover position={Popover.Position.BottomRight} cushion={10}>
+        <Popover position={Popover.Position.BottomRight}>
           <Popover.Trigger.Hover>
             <img
               src={`${staticServer}${avatarUrl}`}
