@@ -149,7 +149,7 @@ export function UserCenter(props: IUserCenterProps) {
           defaultValue={introduction}
           label="用户简介"
           props={{ type: "textarea" }}
-          validators={Validators.maxLength(100, "简介不能超过100字")}
+          validators={[Validators.maxLength(100, "简介不能超过100字")]}
         />
         <div className={styles.modifyController}>
           <Button type="primary" outline onClick={handleModify}>
@@ -211,7 +211,7 @@ export function UserCenter(props: IUserCenterProps) {
               博客数: {userInfo.blogNumber}
             </div>
             <div className={styles.toIndividual}>
-              <Link to="/userHomePage">
+              <Link to={`/blog/${userId}`}>
                 去用户主页 <Icon type="approval" />
               </Link>
             </div>
