@@ -8,7 +8,7 @@
 
 ### 技术栈
 
-#### 1. 后端 Koa+Mysql
+####  后端 Koa+Mysql
 
 - 所用中间件
   - koa-static
@@ -18,9 +18,11 @@
   - koa-router
   - koa-jwt
 
-#### 前端使用框架 React+Hooks+Typescript
+#### 前端使用框架 
 
-- 组件库: Zent
+React+Hooks+Typescript
+
+组件库: Zent
 
 #### 开发进度
 
@@ -39,9 +41,8 @@
 
 ##### **即将更新**
 
-1. 进入用户个人博客主页
-
-......
++ 支持markdown
++ 修复code编辑功能
 
 ## 下面为开发过程中碰到的问题小结
 
@@ -1367,6 +1368,8 @@ export default function App() {
 
 ![](./img/Selection_009.png)
 
+---
+
 #### 16. useEffect中的坑以及利用useRef记录之前的状态
 
 ##### 1. 场景描述
@@ -1563,7 +1566,7 @@ function usePrevious(value) {
 
 [Introduction to useRef Hook](https://dev.to/dinhhuyams/introduction-to-useref-hook-3m7n): 这篇文章很好的讲解了useRef和createRef以及useRef的用法！
 
-
+---
 
 ### 17. 无限下拉的例子
 
@@ -1585,9 +1588,9 @@ function usePrevious(value) {
 
 
 
-
-
  
+
+---
 
 ### 18. 常用的几个height
 
@@ -1641,6 +1644,8 @@ console.log(div.clientWidth);
 console.log(div.scrollHeight);
 div.addEventListener('scroll', () => {console.log(div.scrollTop, div.clientLeft)});
 ~~~
+
+---
 
 ### 19.  拖拽上传图片并展示上传图片
 
@@ -1845,6 +1850,8 @@ export function AvatarUpload(props: IAvatarUploadProps) {
 }
 ~~~
 
+---
+
 ### 20. boder-image, border-clip, border-origin
 
 今天看了一篇博文，学到了不会的几个CSS用法[渐变圆角](https://juejin.im/post/5e4a3a20e51d45270c277754)
@@ -1882,6 +1889,8 @@ export function AvatarUpload(props: IAvatarUploadProps) {
 #### 效果
 
 ![](./img/选区_029.png)
+
+---
 
 ### 21.通过几个CSS例子看filter和background属性
 
@@ -1960,6 +1969,252 @@ export function AvatarUpload(props: IAvatarUploadProps) {
 + 这里的background-attachement不能删除，删除后发现，我们框住的部分中不再是“翅膀的效果”，而是缩小的图片的效果，其具体原因是[background-attachement真实面目](https://segmentfault.com/q/1010000011066337/)，其实可以理解为background-attachement类似于将该图片应用于整个视口，在这个场景中，就相当于伪类元素的背景也是整个适口这么大的一张图，但是只显示了在框内那一部分的图像，因此对该部分进行模糊刚好和底部的背景重叠。
 
 [代码codesandbox](https://codesandbox.io/embed/floral-meadow-rk1f1?fontsize=14&hidenavigation=1&theme=dark)
+
+---
+
+
+
+### 22. 列表拖拽转换的例子
+
+今天看到有些表格中能够通过拖动来换行，手动排序的功能，想来自己实现一下，类似效果如下
+
+![](/home/czx/Desktop/Learn/my-koa-react-blog/img/Peek 2020-02-29 20-14.gif)
+
+#### 主要解决问题的办法
+
++ [drag元素](https://blog.csdn.net/qq_24724109/article/details/103682917)
+
++ clientX和clientY
+
++ 动画元素animition
+
+#### 解决思路
+
++ 委托外部元素监听内容元素的(dragStart阶段，定位被拖动的元素)
++ 委托外部元素监听元素已经被拉到哪个元素的位置 (使用dragover确定，停留在哪个元素的位置上)
++ 为元素添加动画效果
++ 利用node.appendChild相同元素实现元素转换,参考[不使用append的remove使节点快速转移的方法](https://blog.csdn.net/qq_24724109/article/details/103682917)
+
+#### 从一个简单的例子开始
+
+![](/home/czx/Desktop/Learn/my-koa-react-blog/img/Peek 2020-02-29 20-46.gif)
+
+##### HTML
+
+~~~html
+<!---html部分--->
+<ul id="container">
+    <li draggable="true">1</li>
+    <li draggable="true">2</li>
+    <li draggable="true">3</li>
+    <li draggable="true">4</li>
+    <li draggable="true">5</li>
+    <li draggable="true">6</li>
+    <li draggable="true">7</li>
+    <li draggable="true">8</li>
+    <li draggable="true">9</li>
+    <li draggable="true">10</li>
+</ul>
+<button onclick="resetAll()">Reset</button>
+~~~
+
++ 配置draggable=true,使元素变为滑动的
+
+##### CSS
+
+~~~css
+ul {
+    list-style: none;
+}
+
+li {
+    padding: 30px 15px;
+    background-color: cornflowerblue;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 10px;
+    width: 30px;
+    text-align: center;
+    margin: 10px 0;
+    transition: transform 2s ease;
+}
+~~~
+
+##### JS逻辑
+
+~~~javascript
+const con = document.getElementById("container");
+let list = [];
+
+// 主要为了动画滑动的时候，用于控制滑动距离的
+const init = () => {
+    lists = Array.prototype.slice
+        .call(document.querySelectorAll("li"))
+        .map((element, index) => {
+        element.dataset.index = index;
+
+        return {
+            index,
+            offsetX: element.offsetLeft + con.offsetLeft,
+            offsetY: element.offsetTop + con.offsetTop
+        };
+    });
+};
+init();
+
+let startX = 0,
+    startY = 0;
+// 重置按钮的回调
+let resetAll = () => {
+    const list = Array.prototype.slice.call(
+        document.querySelectorAll("li")
+    );
+    list.forEach(item => {
+        item.style.transform = "translate(0, 0)";
+    });
+};
+
+// 用于控制滑动到鼠标移动位置的函数
+const changePosition = (node, relativeX = 0, relativeY = 0) =>
+node &&
+      (node.style.transform = `translate(${relativeX}px, ${relativeY}px)`);
+
+// ondragstart中的event获取拖动元素的位置
+con.ondragstart = function(event) {
+    const target = event.target;
+    startX = event.clientX;
+    startY = event.clientY;
+};
+
+// ondragend 拖动元素目前到达的位置
+// 通过event.clientX和event.clientY可以获取鼠标松掉的位置
+con.ondragend = event => {
+    const node = event.target;
+    const init = lists.find(item => item.index === +node.dataset.index);
+    changePosition(
+        node,
+        event.clientX - init.offsetX,
+        event.clientY - init.offsetY
+    );
+};
+~~~
+
+**关键点**
+
++ 使用dragstart获取元素的初始移动的位置
++ 使用dragend获取元素最终拖动到鼠标落点的位置(用于后续动画移动)
++ 这里注意的是clientX和clientY是元素**相对视口**中的位置，所以需要在元素原有位置的基础上进行适当的长度补偿即可
+
+#### 回到之前的例子
+
+##### HTML
+
+~~~html
+<ul class="container">
+    <li class="item" draggable="true">1</li>
+    <li class="item" draggable="true">2</li>
+    <li class="item" draggable="true">3</li>
+    <li class="item" draggable="true">4</li>
+    <li class="item" draggable="true">5</li>
+    <li class="item" draggable="true">6</li>
+    <li class="item" draggable="true">7</li>
+    <li class="item" draggable="true">8</li>
+    <li class="item" draggable="true">9</li>
+    <li class="item" draggable="true">10</li>
+</ul>
+~~~
+
+##### CSS
+
+~~~css
+ul {
+    list-style: none;
+}
+
+.item {
+    padding: 20px;
+    width: 400px;
+    background-color: cyan;
+    color: red;
+    border: 2px solid #333;
+    margin: 20px 0;
+    transition: transform 1s ease;
+    text-align: center;
+}
+~~~
+
+##### JS逻辑
+
++ 在拖动时保存需要移动元素的对象，并且保存该元素的下一个元素(之后通过insertBefore来实现元素的交换)
++ 使用dropover来更新需要与之发生交换的元素，记录下最终的交换元素
++ 在dropend中对双方元素进行交换，先通过动画实现交换特效，加一个定时器，实现元素的交换(等到动画结束实现真正dom的交换)
+
+~~~javascript
+const con = document.querySelector(".container");
+const dragObj = { nextObj: null, target: null };
+const exchangeObj = { nextObj: null, target: null };
+let timer;
+
+
+const changePosition = (node, relativeX = 0, relativeY = 0) =>
+node &&
+      (node.style.transform = `translate(${relativeX}px, ${relativeY}px)`);
+
+function inserElem(exchange, target) {
+    if (target.target === exchange.target) {
+        return;
+    } else {
+        // nextObj没有说明与最后一个元素做交换
+        if (exchange.nextObj === null) {
+            con.appendChild(target.target);
+        } else {
+            //　将现在这个元素插入到需要交换的前一个元素之前
+            // 这里对于同元素的insertBefore会直接执行在原来节点内元素的删除和新节点内元素的append不需要手动操作
+            con.insertBefore(target.target, exchange.nextObj);
+        }
+    }
+}
+// 记录目前正在拖动的元素
+con.ondragstart = event => {
+    dragObj.target = event.target;
+    dragObj.nextObj = event.target.nextElementSibling;
+};
+
+con.ondragend = event => {
+    if (exchangeObj.target && dragObj.target) {
+        // 先执行动画效果
+        changePosition(
+            dragObj.target,
+            0,
+            exchangeObj.target.offsetTop - dragObj.target.offsetTop
+        );
+        changePosition(
+            exchangeObj.target,
+            0,
+            dragObj.target.offsetTop - exchangeObj.target.offsetTop
+        );
+
+        if (timer) {
+            clearTimeout(timer);
+        }
+	　　 // 动画结束后　定时器执行真正的dom交换
+        timer = setTimeout(() => {
+            inserElem(dragObj, exchangeObj);
+            inserElem(exchangeObj, dragObj);
+            changePosition(dragObj.target, 0, 0);
+            changePosition(exchangeObj.target, 0, 0);
+        }, 1000);
+    }
+};
+
+// 记录下目前划过的需要交换的元素
+con.ondragover = event => {
+    exchangeObj.target = event.target;
+    exchangeObj.nextObj = event.target.nextElementSibling;
+};
+~~~
+
+
 
 ### 1. shadowsocks配置
 
