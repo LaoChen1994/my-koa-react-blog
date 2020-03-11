@@ -42,7 +42,6 @@ const RouterPage: React.FC = () => {
     async function userValidate() {
       const { data } = await getHome();
       if (data && data.status) {
-        console.log(data.userInfo);
         setUserInfo({ ...data.userInfo, isLogin: true });
       }
     }

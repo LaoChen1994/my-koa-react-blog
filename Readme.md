@@ -99,7 +99,9 @@ export const UserProvider: React.FC<{}> = props => {
 - koa-jwt
 - jsonwebtoken
 
-#### 3. 容易出现问题的原因
+---
+
+### 3. 容易出现问题的原因
 
 - cors 和　 jwt 中间件的使用顺序，先使用 cors 再使用 jwt
 
@@ -178,11 +180,15 @@ const handleLogin = async () => {
 };
 ```
 
-#### 4. margin: auto 失效的解决办法
+---
+
+### 4. margin: auto 失效的解决办法
 
 - 元素的 display 设为 block
 
-#### 5. javascript Blob 与字符串之间的转换
+---
+
+### 5. javascript Blob 与字符串之间的转换
 
 使用 iconv-lite 库中的 decode 方法
 
@@ -192,7 +198,9 @@ const iconv = require('iconv-lite');
 elem.todoItem = iconv.decode(elem.todoItem, 'UTF-8');
 ```
 
-#### 6. mysql 插入 datetime 数据类型格式不对的解决办法
+---
+
+### 6. mysql 插入 datetime 数据类型格式不对的解决办法
 
 ```javascript
 // 这里的startTime是前端传过来经过Date.IOString转化的字符串
@@ -202,7 +210,9 @@ const _startTime = moment(new Date(startTime)).format('YYYY-MM-DD HH:mm:ss');
 const _endTime = moment(new Date(endTime)).format('YYYY-MM-DD HH:mm:ss');
 ```
 
-#### 7. 在 canvas 中添加外部字体写 text 的方法
+---
+
+### 7. 在 canvas 中添加外部字体写 text 的方法
 
 ```javascript
 // 这里创建一个link导入本地的@font-face
@@ -245,7 +255,9 @@ image.onerror = function() {
 
 这样即可导入外部字体
 
-#### 8. 优雅的处理 async/await 中的异常
+---
+
+### 8. 优雅的处理 async/await 中的异常
 
 ```javascript
 // 模拟一个Promise的事件
@@ -280,7 +292,9 @@ async function catchError() {
 catchError();
 ```
 
-#### 9. React Hooks 中 useRef, useImperativeHandle, forwardRef 的使用方法
+---
+
+### 9. React Hooks 中 useRef, useImperativeHandle, forwardRef 的使用方法
 
 ##### 1. 三者用处
 
@@ -458,7 +472,9 @@ const rootElement = document.getElementById('root');
 ReactDOM.render(<App />, rootElement);
 ```
 
-#### 10 . React 图片或者文件上传问题
+---
+
+### 10 . React 图片或者文件上传问题
 
 - 通过 base64 前端处理图片为 base64 的解决方案
   - 利用 FileReader 对数据进行读取，如果是图片会将图片读取为 base64 的形式
@@ -590,7 +606,9 @@ export const UploadBtn: React.FC<Props> = props => {
 
 ~~~
 
-#### 11. zent 封装表单组件
+---
+
+### 11. zent 封装表单组件
 
 ##### 1. 利用 zent 的几个组件
 
@@ -743,7 +761,7 @@ const rootElement = document.getElementById('root');
 ReactDOM.render(<App />, rootElement);
 ```
 
-#### 12. nodejs mysql 库的几个使用问题解决
+### 12. nodejs mysql 库的几个使用问题解决
 
 **1. 查询插入数据的信息**
 
@@ -789,7 +807,7 @@ if (!err) {
 }
 ```
 
-#### 13. 在react中使用防抖和节流
+### 13. 在react中使用防抖和节流
 
 ##### 1. 原理
 
@@ -865,9 +883,9 @@ export default Search;
 
 上述代码请查看[codesandbox demo](https://codesandbox.io/s/weathered-http-gc6mn)
 
+---
 
-
-#### 14. React Hook: useContext + useReducer代替redux
+###　14. React Hook: useContext + useReducer代替redux
 
 ##### 0. 背景
 
@@ -1170,7 +1188,9 @@ render(<App />, rootElement);
 
 ~~~
 
-#### 15.  React异步载入组件封装
+---
+
+### 15.  React异步载入组件封装
 
 ##### 1. 场景叙述
 
@@ -1370,7 +1390,7 @@ export default function App() {
 
 ---
 
-#### 16. useEffect中的坑以及利用useRef记录之前的状态
+### 16. useEffect中的坑以及利用useRef记录之前的状态
 
 ##### 1. 场景描述
 
@@ -1586,7 +1606,131 @@ function usePrevious(value) {
 
 #### 2. 使用该方法实现一个无限下拉
 
+常规思路：只要滑到底部，就加载外部数据，之后延长列表即可
 
+这种方式，用intersectionObserver实现非常简单，仅仅需要创建IntersectionObserver监听最后一个元素，然后滑动到底部后更换监听的元素即可。
+
+#### 3. 使用固定元素进行下拉思路
+
++ 监听底部的元素，当元素到达底部(底部元素显示在页面中的时候)
+  + 从数据列表中加载需要加载的元素(比如一页5个元素，第二页应加载index为5-9的元素)
+  + 重新监听对应新的元素的状态(利用disconnect解除原有的监听，使用observer方法实现监听)
++ 当滑动到顶部的时候：
+  + 查询需要在列表中显示的元素的index
+  + 重新监听对应元素的状态
++ 通过为顶部top元素提供margin的方法来模拟下拉过程中scroll的滑动距离
+
+###### 代码实例
+
+详见注释
+
+~~~javascript
+import React, { useState, useEffect, useRef } from "react";
+
+const ITEMS_NUM = 20;
+
+export const SlidingWindowScrolHook = props => {
+  const { data, height } = props;
+  // 目前的起始点和结束点的位置index
+  const [start, setStart] = useState(0);
+  const [end, setEnd] = useState(ITEMS_NUM);
+  const topRef = useRef();
+  const bottomRef = useRef();
+  /*
+  	这里使用observer的原因说一下，因为在new IntersectionObserver调用的时候是传入一个回调函数，而容易因为作用域闭包的问题，使值没有被更新，而使用useRef能够获得对应的值。
+  */
+  const observer = useRef();
+　// 使用disconnect将保存的Observer实例中监听的函数全部解散
+  const resetObserver = () => {
+    observer.current.disconnect();
+  };
+
+  const initObserver = () => {
+    const Observer = new IntersectionObserver(entries => {
+      entries.forEach(elem => {
+        if (elem.isIntersecting) {
+          // 在创建元素的时候，定位了元素的第一个和最后一个子元素的位置
+          // 通过id来实现对于第一和最后一个子元素的监听过程
+          if (elem.target.id === "bottom") {
+            // 确定新的加载的元素的index
+            const newStart =
+              end - 10 <= data.length - ITEMS_NUM
+                ? end - 10
+                : data.length - ITEMS_NUM;
+            const newEnd = end + 10 <= data.length ? end + 10 : data.length;
+
+            if (newStart !== start || newEnd !== end) {
+              resetObserver();
+
+              setStart(newStart);
+              setEnd(newEnd);
+            }
+          } else if (elem.target.id === "top") {
+            const newStart = start - 10 >= 0 ? start - 10 : 0;
+            const newEnd =
+              end === ITEMS_NUM
+                ? ITEMS_NUM
+                : end - 10 > ITEMS_NUM
+                ? end - 10
+                : ITEMS_NUM;
+            /* 
+              这里的判断条件一定要有
+              因为当滑到底部的时候，因为我们是绑定第一个元素并且监听第一个元素是否出现，利用margin模拟滚动条的
+              因此一定会出发top的方法，这里就是要判断如果start和newStart相同，说明是重叠的情况，就是上述的场景，因此需要禁用掉更新
+            */
+            if (newStart !== start || newEnd !== end) {
+              resetObserver();
+
+              setStart(newStart);
+              setEnd(newEnd);
+            }
+          }
+        }
+      });
+    });
+
+    bottomRef.current && Observer.observe(bottomRef.current);
+    bottomRef.current && Observer.observe(topRef.current);
+    observer.current = Observer;
+  };
+
+  useEffect(() => {
+    initObserver();
+    return () => {
+      resetObserver();
+    };
+  }, [end]);
+
+  return (
+    <ul style={{ position: "relative" }}>
+      {data.slice(start, end).map((elem, index) => {
+        const id =
+          index === 0 ? "top" : index === end - start - 1 ? "bottom" : null;
+        const selectRef =
+          index === 0 ? topRef : index === end - start - 1 ? bottomRef : null;
+
+        const top = (index + start) * height;
+
+        return (
+          <li
+            style={{ top, height, position: "absolute" }}
+            id={id}
+            ref={selectRef}
+            key={`items-${index}`}
+          >
+            {elem}
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
+~~~
+
+#### 4. 实验效果
+
+![](./img/Peek 2020-03-02 01-32.gif)
 
  
 
@@ -2216,48 +2360,120 @@ con.ondragover = event => {
 
 
 
-### 1. shadowsocks配置
+### 在React中使用postcss-px-to-viewport和postcss-px2rem
 
-+ 使用命令行工具shadowsocks-libev进行翻墙
+#### 为了实现什么??
+
++ 在移动端页面中，直接根据设计稿中的尺寸进行设计即可，不需要通过人为的计算具体尺寸的大小
+
+#### 1. 移动端适配rem
+
+[移动端适配 px2rem/px2vw 的原理与实现](https://segmentfault.com/a/1190000015619303)
+
+##### 1. rem适配方案
+
++ rem: 根据根元素字体的大小来控制各个rem单位对应的元素的大小
+
+**我们可以通过监听视口宽度的变化动态变化，设置根元素的字体大小，通过rem单位进行转换，即可得到对应适配的大小**
+
+##### 2. 设备长宽的转换
+
+我们将1rem 设置为设计稿宽度的1/10来进行计算: 
+
+**假设设计稿的宽度为375px**
+
+1. 且对应页面元素的宽度为125px
+2. 1rem = 375 / 10 = 37.5
+3. 因此可以计算得到 10 / 3 rem 
+4. 实际显示的页面宽度为　10 / 3 * 37.5 = 125px
+
+**当设为宽度为750px的时候**
+
+1. 元素的rem值已经写死了 10 / 3 rem
+2. 此时1rem的值为 750 / 10 = 75 px (仍为1/10)
+3. 实际显示的值为 75 * 10 / 3 = 250px
+
+| 设备宽度 | 设计稿125px对应的rem值 | 实际显示的长度 |
+| -------- | ---------------------- | -------------- |
+| 375px    | 10/3 rem               | 125px          |
+| 750px    | 10/3 rem               | 250px          |
+
+所以当设备宽度翻倍的时候，其实实际显示的宽度也是相应翻倍的
+
+##### 3. 使用postcss-px2rem方法
+
+1. 安装lib-flexible, postcss-px2rem, postcss-loader
 
 ~~~bash
-sudo apt install shadowsocks-libev
+yarn add lib-flexible postcss-px2rem postcss-loader
 ~~~
 
-+ 设置配置文件shadowsocks.json
+2. 配置webpack
 
-~~~json
-// /etc/shadowsocks.json
-{
-	"server": "host ip地址",
-    "server_port": "端口号",
-    "local_adress": "本地代理地址一般为127.0.0.1",
-    "local_port": "本地代理端口号1080",
-    "password": "远端shadowsocks的登陆密码",
-    "timeout": 5000,
-    "method": "aes-256-cfb", // 校验方法
-    "fast_open": false
-}
+~~~javascript
+      {
+        loader: require.resolve("postcss-loader"),
+        options: {
+          ident: "postcss",
+          plugins: () => [
+            require("postcss-flexbugs-fixes"),
+            require("postcss-preset-env")({
+              autoprefixer: {
+                flexbox: "no-2009"
+              },
+              stage: 3
+            }),
+            px2rem({ remUnit: 75 }), // 就是就是设定初始rem的值，设定为设计稿宽度的1/10
+            postcssNormalize()
+          ],
+          sourceMap: isEnvProduction && shouldUseSourceMap
+        }
 ~~~
 
-+ 运行命令实现翻墙
+3. 使用yarn start 重启项目即可
 
-~~~bash
-ss-local -c /etc/shadowsocks.json
+#### 2. 移动端适配vh, vw
+
+##### 1. vh,vw的适配方案
+
+上述的rem的布局策略，其实可以理解为将1rem 转换为整个页面宽度的1/10，然后通过对应的rem的值来换算到不同的页面中不同元素的宽度，等比例放大，而vh, vw就是将 页面宽度的1%设置为1vw，免去了适配计算的过程
+
+##### 2. 使用的方法
+
+使用postcss-px-to-viewport插件进行操作
+
+~~~javascript
+      {
+
+        loader: require.resolve("postcss-loader"),
+        options: {
+          ident: "postcss",
+          plugins: () => [
+            require("postcss-flexbugs-fixes"),
+            require("postcss-preset-env")({
+              autoprefixer: {
+                flexbox: "no-2009"
+              },
+              stage: 3
+            }),
+            // 新增部分
+            require("postcss-px-to-viewport")({
+              unitToConvert: "px",
+              viewportWidth: 750, // 宽度为设计稿的宽度
+              viewportUnit: "vw",
+              fontViewportUnit: "vw",
+              selectorBlackList: [],
+              minPixelValue: 1,
+              mediaQuery: false,
+              exclude: /\/node_modules\//
+            }),
+            postcssNormalize()
+          ],
 ~~~
 
-+ 配置系统代理
+[详细参数配置过程](https://npm.taobao.org/package/postcss-px-to-viewport)
 
-![](/home/czx/Desktop/Learn/img/Selection_002.png)
 
-先配置成全局代理，然后登陆chrome，进到chrome插件商店中下载 Proxy SwitchyOmega
 
-+ 配置如下
-+ ![image-20200117143732095](/home/czx/.config/Typora/typora-user-images/image-20200117143732095.png)
 
-自动切换处配置为
-
-![image-20200117143751222](/home/czx/.config/Typora/typora-user-images/image-20200117143751222.png) 如果该配置在ruleList中就走shadowsocks否则就走系统代理![image-20200117143834999](/home/czx/.config/Typora/typora-user-images/image-20200117143834999.png)
-
-规则集：https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
 
